@@ -103,7 +103,7 @@ def main():
                         
                     except Exception as e:
                         st.error(f"❌ Error analyzing artifact: {str(e)}")
-                        st.info("Please ensure you have a valid OpenAI API key set in your environment variables.")
+                        st.info("Please ensure you have a valid Gemini API key set in your environment variables.")
     
     with col2:
         st.header("Sample Artifacts")

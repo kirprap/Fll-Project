@@ -1,28 +1,51 @@
 """
-AI-powered artifact analysis using OpenAI Vision API
+AI-powered artifact analysis using Google Gemini Vision API
 """
 
 import os
 import json
-from openai import OpenAI
+import base64
+from google import genai
+from google.genai import types
+from pydantic import BaseModel
 
-# Initialize OpenAI client
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-if not OPENAI_API_KEY:
-    raise ValueError("OPENAI_API_KEY environment variable is required")
+# IMPORTANT: KEEP THIS COMMENT
+# Follow these instructions when using this blueprint:
+# - Note that the newest Gemini model series is "gemini-2.5-flash" or gemini-2.5-pro"
+#   - do not change this unless explicitly requested by the user
+# - Sometimes the google genai SDK has occasional type errors. You might need to run to validate, at time.  
+# The SDK was recently renamed from google-generativeai to google-genai. This file reflects the new name and the new APIs.
 
-openai = OpenAI(api_key=OPENAI_API_KEY)
+# This API key is from Gemini Developer API Key, not vertex AI API Key
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY environment variable is required")
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+
+
+class ArtifactAnalysis(BaseModel):
+    name: str
+    value: str
+    age: str
+    description: str
+    cultural_context: str
+    confidence: float
+    material: str
+    function: str
+    rarity: str
+
 
 def analyze_artifact_image(base64_image):
     """
-    Analyze an artifact image using OpenAI Vision API
+    Analyze an artifact image using Google Gemini Vision API
     Returns structured data about the artifact including name, value, age, and description
     """
     
-    # the newest OpenAI model is "gpt-5" which was released August 7, 2025.
-    # do not change this unless explicitly requested by the user
-    
     try:
+        # Convert base64 to bytes
+        image_bytes = base64.b64decode(base64_image)
+        
         prompt = """
         You are an expert archaeologist and artifact specialist. Analyze this image of an archaeological artifact and provide detailed information.
 
@@ -47,45 +70,40 @@ def analyze_artifact_image(base64_image):
         If you cannot identify the artifact with confidence, indicate this in your response and provide the best possible analysis based on what you can observe.
         """
 
-        response = openai.chat.completions.create(
-            model="gpt-5",
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an expert archaeological analyst. Provide detailed, accurate analysis of artifacts based on visual evidence. Always respond in valid JSON format."
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": prompt
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
-                        }
-                    ]
-                }
+        system_instruction = "You are an expert archaeological analyst. Provide detailed, accurate analysis of artifacts based on visual evidence. Always respond in valid JSON format."
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                types.Part.from_bytes(
+                    data=image_bytes,
+                    mime_type="image/jpeg",
+                ),
+                prompt
             ],
-            response_format={"type": "json_object"},
-            max_completion_tokens=2048
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction,
+                response_mime_type="application/json",
+                response_schema=ArtifactAnalysis,
+            ),
         )
         
         # Parse the JSON response
-        result = json.loads(response.choices[0].message.content)
-        
-        # Validate and clean the result
-        validated_result = validate_analysis_result(result)
-        
-        return validated_result
+        if response.text:
+            result = json.loads(response.text)
+            
+            # Validate and clean the result
+            validated_result = validate_analysis_result(result)
+            
+            return validated_result
+        else:
+            raise Exception("Empty response from Gemini API")
         
     except json.JSONDecodeError as e:
         raise Exception(f"Failed to parse AI response as JSON: {str(e)}")
     except Exception as e:
         raise Exception(f"Failed to analyze artifact image: {str(e)}")
+
 
 def validate_analysis_result(result):
     """
@@ -110,6 +128,7 @@ def validate_analysis_result(result):
     
     return validated
 
+
 def get_artifact_suggestions(description):
     """
     Get artifact suggestions based on a text description
@@ -121,7 +140,7 @@ def get_artifact_suggestions(description):
         Based on this description of an archaeological artifact: "{description}"
         
         Suggest 3-5 possible artifact types that might match this description.
-        Respond with a JSON array of objects, each containing:
+        Respond with a JSON object containing a "suggestions" array of objects, each containing:
         - name: Artifact name
         - likelihood: How likely this identification is (0.0 to 1.0)
         - reason: Brief explanation of why this could be a match
@@ -129,27 +148,24 @@ def get_artifact_suggestions(description):
         Focus on common archaeological artifacts that match the description.
         """
         
-        response = openai.chat.completions.create(
-            model="gpt-5",
-            messages=[
-                {
-                    "role": "system", 
-                    "content": "You are an archaeological expert providing artifact identification suggestions."
-                },
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ],
-            response_format={"type": "json_object"},
-            max_completion_tokens=1024
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction="You are an archaeological expert providing artifact identification suggestions.",
+                response_mime_type="application/json",
+            ),
         )
         
-        result = json.loads(response.choices[0].message.content)
-        return result.get('suggestions', [])
+        if response.text:
+            result = json.loads(response.text)
+            return result.get('suggestions', [])
+        else:
+            return []
         
     except Exception as e:
         return []
+
 
 def compare_with_reference(base64_image, reference_artifacts):
     """
@@ -158,6 +174,9 @@ def compare_with_reference(base64_image, reference_artifacts):
     """
     
     try:
+        # Convert base64 to bytes
+        image_bytes = base64.b64decode(base64_image)
+        
         # Create a description of reference artifacts for comparison
         reference_descriptions = []
         for artifact in reference_artifacts:
@@ -177,31 +196,25 @@ def compare_with_reference(base64_image, reference_artifacts):
         - alternative_matches: Array of other possible matches with their similarity scores
         """
         
-        response = openai.chat.completions.create(
-            model="gpt-5",
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": prompt
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}"
-                            }
-                        }
-                    ]
-                }
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[
+                types.Part.from_bytes(
+                    data=image_bytes,
+                    mime_type="image/jpeg",
+                ),
+                prompt
             ],
-            response_format={"type": "json_object"},
-            max_completion_tokens=1024
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+            ),
         )
         
-        result = json.loads(response.choices[0].message.content)
-        return result
+        if response.text:
+            result = json.loads(response.text)
+            return result
+        else:
+            return None
         
     except Exception as e:
         return None
