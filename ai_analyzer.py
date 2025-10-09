@@ -17,11 +17,12 @@ from pydantic import BaseModel
 # The SDK was recently renamed from google-generativeai to google-genai. This file reflects the new name and the new APIs.
 
 # This API key is from Gemini Developer API Key, not vertex AI API Key
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    raise ValueError("GEMINI_API_KEY environment variable is required")
-
-client = genai.Client(api_key=GEMINI_API_KEY)
+def get_gemini_client():
+    """Get Gemini client, raising a user-friendly error if API key is missing"""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is not configured. Please add your Gemini API key in the Secrets panel.")
+    return genai.Client(api_key=api_key)
 
 
 class ArtifactAnalysis(BaseModel):
@@ -43,6 +44,9 @@ def analyze_artifact_image(base64_image):
     """
     
     try:
+        # Get Gemini client
+        client = get_gemini_client()
+        
         # Convert base64 to bytes
         image_bytes = base64.b64decode(base64_image)
         
@@ -136,6 +140,8 @@ def get_artifact_suggestions(description):
     """
     
     try:
+        client = get_gemini_client()
+        
         prompt = f"""
         Based on this description of an archaeological artifact: "{description}"
         
@@ -174,6 +180,8 @@ def compare_with_reference(base64_image, reference_artifacts):
     """
     
     try:
+        client = get_gemini_client()
+        
         # Convert base64 to bytes
         image_bytes = base64.b64decode(base64_image)
         

@@ -2,7 +2,6 @@ import streamlit as st
 import base64
 import io
 from PIL import Image
-import pandas as pd
 from datetime import datetime
 from artifact_database import get_artifact_database
 from ai_analyzer import analyze_artifact_image
@@ -86,24 +85,37 @@ def main():
                             with result_col3:
                                 st.metric("Age/Period", result.get('age', 'Unknown'))
                             
-                            # Additional details
-                            if result.get('description'):
-                                st.subheader("Description")
-                                st.write(result['description'])
+                            # Additional details in expandable sections
+                            with st.expander("📋 Detailed Information", expanded=True):
+                                if result.get('description'):
+                                    st.subheader("Description")
+                                    st.write(result['description'])
+                                
+                                if result.get('material'):
+                                    st.subheader("Material")
+                                    st.write(result['material'])
+                                
+                                if result.get('function'):
+                                    st.subheader("Function/Purpose")
+                                    st.write(result['function'])
+                                
+                                if result.get('rarity'):
+                                    st.subheader("Rarity")
+                                    st.write(result['rarity'])
                             
                             if result.get('cultural_context'):
-                                st.subheader("Cultural Context")
-                                st.write(result['cultural_context'])
+                                with st.expander("🌍 Cultural Context", expanded=False):
+                                    st.write(result['cultural_context'])
                             
                             if result.get('confidence'):
-                                st.subheader("Analysis Confidence")
-                                confidence = float(result['confidence'])
-                                st.progress(confidence)
-                                st.write(f"Confidence: {confidence*100:.1f}%")
+                                with st.expander("📊 Analysis Confidence", expanded=False):
+                                    confidence = float(result['confidence'])
+                                    st.progress(confidence)
+                                    st.write(f"Confidence: {confidence*100:.1f}%")
                         
                     except Exception as e:
                         st.error(f"❌ Error analyzing artifact: {str(e)}")
-                        st.info("Please ensure you have a valid Gemini API key set in your environment variables.")
+                        st.info("💡 To enable AI analysis, add your free Gemini API key in the Secrets panel (Tools → Secrets → Add GEMINI_API_KEY). Get your free key at: https://aistudio.google.com/apikey")
     
     with col2:
         st.header("Sample Artifacts")
@@ -138,6 +150,12 @@ def main():
                     st.write(f"**Name:** {result.get('name', 'Unknown')}")
                     st.write(f"**Value:** ${result.get('value', 'Unknown')}")
                     st.write(f"**Age:** {result.get('age', 'Unknown')}")
+                    if result.get('material'):
+                        st.write(f"**Material:** {result['material']}")
+                    if result.get('function'):
+                        st.write(f"**Function:** {result['function']}")
+                    if result.get('rarity'):
+                        st.write(f"**Rarity:** {result['rarity']}")
                     if result.get('description'):
                         st.write(f"**Description:** {result['description']}")
         
