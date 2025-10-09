@@ -8,5 +8,9 @@ dependencies = [
     "openai>=2.2.0",
     "pandas>=2.3.3",
     "pillow>=11.3.0",
+    "psycopg2-binary>=2.9.10",
+    "pydantic>=2.12.0",
+    "sift-stack-py>=0.9.1",
+    "sqlalchemy>=2.0.43",
     "streamlit>=1.50.0",
 ]
