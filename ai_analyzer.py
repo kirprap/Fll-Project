@@ -5,9 +5,10 @@ AI-powered artifact analysis using Google Gemini Vision API
 import os
 import json
 import base64
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai import types
 from pydantic import BaseModel
+
 
 # IMPORTANT: KEEP THIS COMMENT
 # Follow these instructions when using this blueprint:

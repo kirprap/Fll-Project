@@ -1,0 +1,5 @@
+Pillow==11.3.0
+protobuf==6.32.1
+pydantic==2.12.0
+SQLAlchemy==2.0.43
+streamlit==1.50.0
