@@ -1,5 +1,21 @@
-Pillow==11.3.0
-protobuf==6.32.1
-pydantic==2.12.0
-SQLAlchemy==2.0.43
-streamlit==1.50.0
+# Core web framework
+streamlit==1.28.0
+
+# Database
+sqlalchemy==2.0.0
+
+# Image processing
+pillow==10.0.0
+
+# AI Services (Free tier, no age restriction)
+huggingface_hub==0.19.0
+requests==2.31.0
+transformers==4.35.0
+
+# Additional AI libraries
+sentence-transformers==2.2.2
+torch==2.9.0+cpu
+scipy==1.11.3
+
+# Environment and utils
+python-dotenv==1.0.0

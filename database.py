@@ -2,27 +2,20 @@
 Database models and operations for archaeological artifact storage
 """
 
-import os
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Text, Float, DateTime, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 
+SQLALCHEMY_DATABASE_URL = "sqlite:///artifacts.db"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 Base = declarative_base()
-
-def get_database_engine():
-    """Get database engine, raising error if DATABASE_URL is not configured"""
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise ValueError("DATABASE_URL is not configured. Please ensure PostgreSQL database is set up.")
-    return create_engine(database_url)
-
-def get_session_maker():
-    """Get session maker for database operations"""
-    engine = get_database_engine()
-    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
 
 class Artifact(Base):
     """Model for storing identified archaeological artifacts"""
@@ -123,7 +116,7 @@ def save_artifact(artifact_data, image_bytes):
             age=artifact_data.get('age', 'Unknown'),
             description=artifact_data.get('description'),
             cultural_context=artifact_data.get('cultural_context'),
-            material=artifact_data.get('material'),
+            material=artifact_data.get('material',
             function=artifact_data.get('function'),
             rarity=artifact_data.get('rarity'),
             confidence=artifact_data.get('confidence', 0.0),
