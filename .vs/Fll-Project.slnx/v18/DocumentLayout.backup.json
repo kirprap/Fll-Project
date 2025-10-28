@@ -3,56 +3,60 @@
   "WorkspaceRootPath": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.bat||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:run.bat||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\ai_analyzer.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ai_analyzer.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\requirements.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:requirements.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.env||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.env||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\ai_analyzer.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:ai_analyzer.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\Dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Dockerfile||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.bat||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:run.bat||{3B902123-F8A7-4915-9F01-361F908088D0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\database.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:database.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.sh||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:run.sh||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\config.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:config.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\init_db.py||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:init_db.py||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\docker-compose.yml||{06C066C6-04A2-4E5D-8202-439FD4234EF1}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:docker-compose.yml||{06C066C6-04A2-4E5D-8202-439FD4234EF1}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.env||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.env||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\app.py||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:app.py||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\config.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:config.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\pyproject.toml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:pyproject.toml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\artifact_database.py||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:artifact_database.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\init_db.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:init_db.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.sh||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:run.sh||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\database.py||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:database.py||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\docker-compose.yml||{06C066C6-04A2-4E5D-8202-439FD4234EF1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:docker-compose.yml||{06C066C6-04A2-4E5D-8202-439FD4234EF1}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.replit||{8B382828-6202-11D1-8870-0000F87579D2}",
@@ -70,7 +74,72 @@
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "pyproject.toml",
+              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\pyproject.toml",
+              "RelativeDocumentMoniker": "pyproject.toml",
+              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\pyproject.toml",
+              "RelativeToolTip": "pyproject.toml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-28T01:09:09.331Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "run.bat",
+              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.bat",
+              "RelativeDocumentMoniker": "run.bat",
+              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.bat",
+              "RelativeToolTip": "run.bat",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000614|",
+              "WhenOpened": "2025-10-23T21:35:27.862Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ai_analyzer.py",
+              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\ai_analyzer.py",
+              "RelativeDocumentMoniker": "ai_analyzer.py",
+              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\ai_analyzer.py",
+              "RelativeToolTip": "ai_analyzer.py",
+              "ViewState": "AgIAAGcBAAAAAAAAAAAEwAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-10T01:10:24.254Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "app.py",
+              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\app.py",
+              "RelativeDocumentMoniker": "app.py",
+              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\app.py",
+              "RelativeToolTip": "app.py",
+              "ViewState": "AgIAAIABAAAAAAAAAAAnwIMBAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-10T00:57:02.523Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 8,
+              "Title": "artifact_database.py",
+              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\artifact_database.py",
+              "RelativeDocumentMoniker": "artifact_database.py",
+              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\artifact_database.py",
+              "RelativeToolTip": "artifact_database.py",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-10T01:10:05.226Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "config.py",
               "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\config.py",
               "RelativeDocumentMoniker": "config.py",
@@ -83,41 +152,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "run.sh",
-              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.sh",
-              "RelativeDocumentMoniker": "run.sh",
-              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.sh",
-              "RelativeToolTip": "run.sh",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAUAAAAAAAAAA==",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|",
-              "WhenOpened": "2025-10-23T21:35:33.411Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "run.bat",
-              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.bat",
-              "RelativeDocumentMoniker": "run.bat",
-              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.bat",
-              "RelativeToolTip": "run.bat",
-              "ViewState": "AgIAAAcAAAAAAAAAAAAIwC8AAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000614|",
-              "WhenOpened": "2025-10-23T21:35:27.862Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": ".env",
               "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.env",
               "RelativeDocumentMoniker": ".env",
               "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.env",
               "RelativeToolTip": ".env",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2025-10-23T21:35:20.358Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Dockerfile",
+              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\Dockerfile",
+              "RelativeDocumentMoniker": "Dockerfile",
+              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\Dockerfile",
+              "RelativeToolTip": "Dockerfile",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-10-10T01:01:23.062Z",
               "EditorCaption": ""
             },
             {
@@ -128,27 +184,27 @@
               "RelativeDocumentMoniker": "requirements.txt",
               "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\requirements.txt",
               "RelativeToolTip": "requirements.txt",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAnwBUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
               "WhenOpened": "2025-10-10T01:18:52.716Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "Dockerfile",
-              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\Dockerfile",
-              "RelativeDocumentMoniker": "Dockerfile",
-              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\Dockerfile",
-              "RelativeToolTip": "Dockerfile",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-10-10T01:01:23.062Z",
+              "DocumentIndex": 9,
+              "Title": "init_db.py",
+              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\init_db.py",
+              "RelativeDocumentMoniker": "init_db.py",
+              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\init_db.py",
+              "RelativeToolTip": "init_db.py",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
+              "WhenOpened": "2025-10-10T01:10:08.2Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 10,
               "Title": ".gitignore",
               "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.gitignore",
               "RelativeDocumentMoniker": ".gitignore",
@@ -161,20 +217,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ai_analyzer.py",
-              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\ai_analyzer.py",
-              "RelativeDocumentMoniker": "ai_analyzer.py",
-              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\ai_analyzer.py",
-              "RelativeToolTip": "ai_analyzer.py",
-              "ViewState": "AgIAAFYAAAAAAAAAAAAAABoAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2025-10-10T01:10:24.254Z",
+              "DocumentIndex": 11,
+              "Title": "run.sh",
+              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.sh",
+              "RelativeDocumentMoniker": "run.sh",
+              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\run.sh",
+              "RelativeToolTip": "run.sh",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAUAAAAAAAAAA==",
+              "Icon": "00000000-0000-0000-0000-000000000000.000000|",
+              "WhenOpened": "2025-10-23T21:35:33.411Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 12,
               "Title": "database.py",
               "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\database.py",
               "RelativeDocumentMoniker": "database.py",
@@ -187,20 +243,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "init_db.py",
-              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\init_db.py",
-              "RelativeDocumentMoniker": "init_db.py",
-              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\init_db.py",
-              "RelativeToolTip": "init_db.py",
-              "ViewState": "AgIAABYAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2025-10-10T01:10:08.2Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 13,
               "Title": "docker-compose.yml",
               "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\docker-compose.yml",
               "RelativeDocumentMoniker": "docker-compose.yml",
@@ -213,45 +256,14 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "artifact_database.py",
-              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\artifact_database.py",
-              "RelativeDocumentMoniker": "artifact_database.py",
-              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\artifact_database.py",
-              "RelativeToolTip": "artifact_database.py",
-              "ViewState": "AgIAAE4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2025-10-10T01:10:05.226Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 14,
               "Title": ".replit",
               "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.replit",
               "RelativeDocumentMoniker": ".replit",
               "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\.replit",
               "RelativeToolTip": ".replit",
-              "ViewState": "AgIAABAAAAAAAAAAAAAUwCsAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2025-10-10T00:57:54.489Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "app.py",
-              "DocumentMoniker": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\app.py",
-              "RelativeDocumentMoniker": "app.py",
-              "ToolTip": "C:\\Users\\kirpr\\source\\repos\\kirprap\\Fll-Project\\app.py",
-              "RelativeToolTip": "app.py",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAuwA8AAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002457|",
-              "WhenOpened": "2025-10-10T00:57:02.523Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }

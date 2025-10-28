@@ -5,12 +5,10 @@ from PIL import Image
 from datetime import datetime
 from artifact_database import get_artifact_database
 from ai_analyzer import analyze_artifact_image
-from database import (
-    save_artifact, get_all_artifacts, search_artifacts, 
+from database import (save_artifact, get_all_artifacts, search_artifacts, 
     get_artifact_by_id, get_artifact_count, 
     update_artifact_verification, update_artifact_profile,
-    get_artifacts_by_verification_status
-)
+    get_artifacts_by_verification_status)
 from ai_analyzer import compare_with_reference
 
 # Configure page
@@ -100,6 +98,7 @@ def main():
                                 # Create columns for result display
                                 result_col1, result_col2, result_col3 = st.columns(3)
                             
+
                                 with result_col1:
                                     st.metric("Artifact Name", result.get('name', 'Unknown'))
                                 
@@ -181,7 +180,7 @@ def main():
                             
                         except Exception as e:
                             st.error(f"❌ Error analyzing artifact: {str(e)}")
-                            st.info("💡 To enable AI analysis, add your free Gemini API key in the Secrets panel (Tools → Secrets → Add GEMINI_API_KEY). Get your free key at: https://aistudio.google.com/apikey")
+                            st.info("💡 AI analysis uses Hugging Face Inference. To use an authenticated client add a Hugging Face token named `HUGGINGFACE_TOKEN` in your environment or Secrets (Tools → Secrets → Add HUGGINGFACE_TOKEN). You can create a token at https://huggingface.co/settings/tokens. If no token is provided, the app will attempt unauthenticated public access which may be rate-limited.")
         
         with col2:
             st.header("Sample Artifacts")
@@ -396,6 +395,7 @@ def main():
                             st.write(f"**Rarity:** {artifact['rarity']}")
                             st.write(f"**Verification Status:** {artifact['verification_status'].title()}")
                             
+
                             if artifact['description']:
                                 st.write(f"**Description:** {artifact['description']}")
                             

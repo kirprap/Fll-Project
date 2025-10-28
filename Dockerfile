@@ -11,7 +11,13 @@ RUN apt-get update && apt-get install -y \
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Upgrade pip tools and install CPU-only torch from PyTorch index first,
+# then install the rest of requirements to avoid pip trying to fetch torch+cpu from PyPI.
+RUN python -m pip install --upgrade pip setuptools wheel && \
+    python -m pip install --no-cache-dir torch==2.9.0+cpu --index-url https://download.pytorch.org/whl/cpu || \
+    python -m pip install --no-cache-dir torch==2.9.0 --no-deps && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .

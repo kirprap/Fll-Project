@@ -116,7 +116,7 @@ def save_artifact(artifact_data, image_bytes):
             age=artifact_data.get('age', 'Unknown'),
             description=artifact_data.get('description'),
             cultural_context=artifact_data.get('cultural_context'),
-            material=artifact_data.get('material',
+            material=artifact_data.get('material'),
             function=artifact_data.get('function'),
             rarity=artifact_data.get('rarity'),
             confidence=artifact_data.get('confidence', 0.0),

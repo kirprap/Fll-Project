@@ -8,6 +8,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/artifacts
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+       - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
     volumes:
       - .:/app
     depends_on:
