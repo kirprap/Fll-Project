@@ -79,14 +79,12 @@ class Artifact(Base):
 
 def init_db():
     """Initialize database tables"""
-    engine = get_database_engine()
     Base.metadata.create_all(bind=engine)
 
 
 @contextmanager
 def get_db():
     """Get database session with automatic cleanup"""
-    SessionLocal = get_session_maker()
     db = SessionLocal()
     try:
         yield db

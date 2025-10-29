@@ -3,6 +3,7 @@ streamlit==1.28.0
 
 # Database
 sqlalchemy==2.0.0
+sqlalchemy-utils == 0.42.0
 
 # Image processing
 pillow==10.0.0

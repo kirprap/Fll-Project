@@ -225,7 +225,7 @@ def main():
                             st.write(f"**Description:** {result['description']}")
             
                 # Clear history button
-                if st.button("🗑️ Clear Search History"):
+                if st.button("🗑️ Clear Search History", key="clear"):
                     st.session_state.search_history = []
                     st.rerun()
     
