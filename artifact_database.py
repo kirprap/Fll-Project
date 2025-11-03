@@ -59,11 +59,15 @@ def _load_vit():
     """Load and cache ViT processor+model for classification."""
     global _VIT_PROCESSOR, _VIT_MODEL
     if _VIT_MODEL is None or _VIT_PROCESSOR is None:
+        logger.info(f"Loading ViT model: {_VIT_MODEL_NAME}")
         _VIT_PROCESSOR = AutoImageProcessor.from_pretrained(_VIT_MODEL_NAME)
         _VIT_MODEL = ViTForImageClassification.from_pretrained(_VIT_MODEL_NAME)
         device = _load_device()
         _VIT_MODEL.to(device)
         _VIT_MODEL.eval()
+        # Enable inference mode for better performance
+        torch.set_grad_enabled(False)
+        logger.info(f"ViT model loaded successfully on {device}")
     return _VIT_PROCESSOR, _VIT_MODEL
 
 
@@ -71,11 +75,15 @@ def _load_clip():
     """Load and cache CLIP processor+model for embeddings."""
     global _CLIP_PROCESSOR, _CLIP_MODEL_OBJ
     if _CLIP_MODEL_OBJ is None or _CLIP_PROCESSOR is None:
+        logger.info(f"Loading CLIP model: {_CLIP_MODEL}")
         _CLIP_PROCESSOR = CLIPProcessor.from_pretrained(_CLIP_MODEL)
         _CLIP_MODEL_OBJ = CLIPModel.from_pretrained(_CLIP_MODEL)
         device = _load_device()
         _CLIP_MODEL_OBJ.to(device)
         _CLIP_MODEL_OBJ.eval()
+        # Enable inference mode for better performance
+        torch.set_grad_enabled(False)
+        logger.info(f"CLIP model loaded successfully on {device}")
     return _CLIP_PROCESSOR, _CLIP_MODEL_OBJ
 
 

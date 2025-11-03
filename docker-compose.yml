@@ -1,30 +1,62 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  web:
-    build: .
-    ports:
-      - "8501:8501"
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/artifacts
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-       - HUGGINGFACE_TOKEN=${HUGGINGFACE_TOKEN}
-    volumes:
-      - .:/app
-    depends_on:
-      - db
-    command: streamlit run app.py --server.port=8501 --server.address=0.0.0.0
-
   db:
     image: postgres:15-alpine
+    container_name: postgres
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=artifacts
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: artifacts
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fll_web
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/artifacts
+      OLLAMA_ENDPOINT: http://ollama:11434
+    ports:
+      - "8501:8501"
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    command: >
+      sh -c "python init_db.py && streamlit run app.py \
+      --server.port=8501 --server.address=0.0.0.0"
+    restart: unless-stopped
+    volumes:
+      - .:/app
 
 volumes:
   postgres_data:
+  ollama_data:

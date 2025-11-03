@@ -55,3 +55,6 @@ typing_extensions==4.15.0
 tzdata==2025.2
 urllib3==2.5.0
 watchdog==6.0.0
+ollama==0.6.0
+psycopg2-binary==2.9.9
+python-dotenv==1.0.1
