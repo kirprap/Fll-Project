@@ -6,6 +6,8 @@ import numpy as np
 from PIL import Image
 import time
 import logging
+import sys
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,10 +24,10 @@ class OllamaClient:
 
     def __init__(
         self,
-        model: str = "qwen3-vl:32b",
+        model: str = "qwen3-vl:latest",  # Changed from 32b to latest (6GB, much faster)
         endpoint: Optional[str] = None,
         max_retries: int = 3,
-        timeout: int = 300  # Increased to 5 minutes for large models
+        timeout: int = 600  # Increased to 10 minutes for large models
     ):
         # Auto-detect endpoint based on environment
         if endpoint is None:
@@ -222,10 +224,21 @@ import streamlit as st
 import io
 
 # Import database functions
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+if PROJECT_DIR not in sys.path:
+    sys.path.insert(0, PROJECT_DIR)
+
 try:
     from database import save_artifact, get_all_artifacts, search_artifacts, get_artifact_by_id
-except ImportError:
-    st.error("Database module not found. Please ensure database.py is available.")
+except ModuleNotFoundError as e:
+    if getattr(e, "name", None) == "database":
+        st.error("Database module not found. Please ensure database.py is available.")
+        st.stop()
+    else:
+        st.error(f"Missing dependency: {getattr(e, 'name', 'unknown')}. Please install requirements.")
+        st.stop()
+except Exception as e:
+    st.error(f"Error importing database: {str(e)}")
     st.stop()
 
 
@@ -233,6 +246,13 @@ except ImportError:
 def get_analyzer():
     """Cache the AI analyzer to avoid reloading the model."""
     return AIAnalyzer()
+
+
+@st.cache_resource
+def get_fast_analyzer(tier: str):
+    """Cache the fast analyzer for the selected tier."""
+    from fast_analyzer import FastAnalyzer
+    return FastAnalyzer(tier=tier)
 
 
 def main():
@@ -286,51 +306,72 @@ def identify_artifact_page():
         with col2:
             st.subheader("Analysis Results")
 
-            # Model selection
-            model_choice = st.selectbox(
-                "Select AI Model",
-                ["ollama", "vit", "clip"],
-                help="Ollama provides detailed analysis, ViT for classification, CLIP for embeddings"
+            # Speed tier selection
+            st.markdown("**⚡ Speed vs Quality**")
+            speed_tier = st.radio(
+                "Choose analysis speed:",
+                ["INSTANT (1-2s)", "FAST (20-40s)", "BALANCED (30-60s)", "QUALITY (1-2min)"],
+                index=1,  # Default to FAST
+                help="Faster = less detailed, Slower = more detailed",
+                horizontal=True
             )
 
+            # Extract tier name
+            tier_map = {
+                "INSTANT (1-2s)": "INSTANT",
+                "FAST (20-40s)": "FAST",
+                "BALANCED (30-60s)": "BALANCED",
+                "QUALITY (1-2min)": "QUALITY"
+            }
+            selected_tier = tier_map[speed_tier]
+
+            # Show what this tier uses
+            tier_info = {
+                "INSTANT": "Uses ViT (basic classification)",
+                "FAST": "Uses LLaVA 7B (good quality)",
+                "BALANCED": "Uses Qwen2-VL 7B (better quality)",
+                "QUALITY": "Uses Qwen3-VL (best quality)"
+            }
+            st.caption(tier_info[selected_tier])
+
             if st.button("Analyze Artifact", type="primary"):
-                with st.spinner("Analyzing artifact... This may take a few minutes for large models."):
+                expected_time = {
+                    "INSTANT": "1-2 seconds",
+                    "FAST": "20-40 seconds",
+                    "BALANCED": "30-60 seconds",
+                    "QUALITY": "1-2 minutes"
+                }[selected_tier]
+
+                with st.spinner(f"Analyzing artifact... Expected time: {expected_time}"):
                     try:
-                        analyzer = get_analyzer()
-                        result = analyzer.analyze_image(image, model_choice=model_choice)
+                        # Use fast analyzer
+                        analyzer = get_fast_analyzer(selected_tier)
+                        result = analyzer.analyze_artifact(image)
 
-                        if model_choice == "ollama":
-                            st.success("Analysis Complete!")
-                            st.markdown(f"**Name:** {result.get('name', 'Unknown')}")
-                            st.markdown(f"**Description:** {result.get('description', 'N/A')}")
-                            st.markdown(f"**Confidence:** {result.get('confidence', 0):.2%}")
+                        st.success(f"✅ Analysis Complete in {result.get('analysis_time', 'N/A')}!")
+                        st.markdown(f"**Name:** {result.get('name', 'Unknown')}")
+                        st.markdown(f"**Description:** {result.get('description', 'N/A')}")
+                        st.markdown(f"**Confidence:** {result.get('confidence', 0):.2%}")
+                        st.markdown(f"**Method:** {result.get('method', 'N/A')}")
+                        st.markdown(f"**Quality Tier:** {result.get('tier', 'N/A')}")
 
-                            # Option to save to archive
-                            if st.button("Save to Archive"):
-                                img_bytes = io.BytesIO()
-                                image.save(img_bytes, format='PNG')
-                                artifact_data = {
-                                    "name": result.get('name', 'Unknown'),
-                                    "description": result.get('description', ''),
-                                    "confidence": result.get('confidence', 0.0),
-                                    "value": "Requires expert appraisal",
-                                    "age": "Requires expert analysis",
-                                    "cultural_context": "Requires expert input",
-                                    "material": "Requires physical inspection",
-                                    "function": "Inferred from analysis",
-                                    "rarity": "Requires comparison"
-                                }
-                                artifact_id = save_artifact(artifact_data, img_bytes.getvalue())
-                                st.success(f"Artifact saved to archive with ID: {artifact_id}")
-
-                        elif model_choice == "vit":
-                            st.success("Classification Complete!")
-                            st.markdown(f"**Name:** {result.get('name', 'Unknown')}")
-                            st.markdown(f"**Confidence:** {result.get('confidence', 0):.2%}")
-
-                        elif model_choice == "clip":
-                            st.success("Embedding Generated!")
-                            st.info("CLIP embedding generated for similarity search.")
+                        # Option to save to archive
+                        if st.button("Save to Archive"):
+                            img_bytes = io.BytesIO()
+                            image.save(img_bytes, format='PNG')
+                            artifact_data = {
+                                "name": result.get('name', 'Unknown'),
+                                "description": result.get('description', ''),
+                                "confidence": result.get('confidence', 0.0),
+                                "value": "Requires expert appraisal",
+                                "age": "Requires expert analysis",
+                                "cultural_context": "Requires expert input",
+                                "material": "Requires physical inspection",
+                                "function": "Inferred from analysis",
+                                "rarity": "Requires comparison"
+                            }
+                            artifact_id = save_artifact(artifact_data, img_bytes.getvalue())
+                            st.success(f"Artifact saved to archive with ID: {artifact_id}")
 
                     except RuntimeError as e:
                         error_msg = str(e)

@@ -22,10 +22,10 @@ class OllamaClient:
 
     def __init__(
         self,
-        model: str = "qwen3-vl:32b",
+        model: str = "qwen3-vl:latest",  # Changed from 32b to latest (6GB, much faster)
         endpoint: Optional[str] = None,
         max_retries: int = 3,
-        timeout: int = 300  # Increased to 5 minutes for large models
+        timeout: int = 30  # Increased to 10 minutes for large models
     ):
         # Auto-detect endpoint based on environment
         if endpoint is None:
