@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Union
 
 from sqlalchemy import (
     create_engine,
@@ -16,6 +16,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 import base64
+from sqlalchemy import inspect, text
 
 # ----------------------------------------------------------------------
 # Configuration
@@ -90,6 +91,8 @@ class Artifact(Base):
     provenance: Optional[str] = Column(Text)
     historical_context: Optional[str] = Column(Text)
     references: Optional[str] = Column(Text)
+    # Tags (comma-separated)
+    tags: Optional[str] = Column(Text)
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert artifact to a plain‑dictionary representation."""
@@ -113,6 +116,7 @@ class Artifact(Base):
             "provenance": self.provenance,
             "historical_context": self.historical_context,
             "references": self.references,
+            "tags": self.tags,
         }
 
 
@@ -122,6 +126,17 @@ class Artifact(Base):
 def init_db() -> None:
     """Create all tables defined by the ORM models."""
     Base.metadata.create_all(bind=engine)
+    # Ensure 'tags' column exists for existing databases
+    try:
+        inspector = inspect(engine)
+        columns = [c["name"] for c in inspector.get_columns("artifacts")]
+        if "tags" not in columns:
+            with engine.connect() as conn:
+                conn.execute(text("ALTER TABLE artifacts ADD COLUMN tags TEXT"))
+                conn.commit()
+    except Exception:
+        # Best-effort; ignore if not supported or already exists
+        pass
 
 
 @contextmanager
@@ -153,6 +168,10 @@ def save_artifact(artifact_data: Dict[str, Any], image_bytes: bytes) -> int:
             confidence=artifact_data.get("confidence", 0.0),
             image_data=image_bytes,
             analyzed_at=datetime.utcnow(),
+            tags=(
+                ",".join(artifact_data["tags"]) if isinstance(artifact_data.get("tags"), list)
+                else artifact_data.get("tags")
+            ),
         )
         db.add(artifact)
         db.flush()  # Obtain PK without committing twice
@@ -196,22 +215,25 @@ def get_artifact_by_id(artifact_id: int) -> Optional[Dict[str, Any]]:
         return data
 
 
-def search_artifacts(query: str, limit: int = 50) -> List[Dict[str, Any]]:
-    """Search across a handful of textual columns."""
+def search_artifacts(query: str, limit: int = 50, tags: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+    """Search across textual columns and optionally filter by tags.
+
+    If tags are provided, all tags must be present in the artifact's tag string.
+    """
     with get_db() as db:
         pattern = f"%{query}%"
-        artifacts = (
-            db.query(Artifact)
-            .filter(
-                (Artifact.name.ilike(pattern))
-                | (Artifact.description.ilike(pattern))
-                | (Artifact.cultural_context.ilike(pattern))
-                | (Artifact.material.ilike(pattern))
-            )
-            .order_by(Artifact.uploaded_at.desc())
-            .limit(limit)
-            .all()
+        q = db.query(Artifact).filter(
+            (Artifact.name.ilike(pattern))
+            | (Artifact.description.ilike(pattern))
+            | (Artifact.cultural_context.ilike(pattern))
+            | (Artifact.material.ilike(pattern))
         )
+        if tags:
+            for t in tags:
+                t = (t or "").strip()
+                if t:
+                    q = q.filter(Artifact.tags.ilike(f"%{t}%"))
+        artifacts = q.order_by(Artifact.uploaded_at.desc()).limit(limit).all()
         return [a.to_dict() for a in artifacts]
 
 
@@ -235,5 +257,20 @@ def update_artifact_verification(
         if status.lower() == "verified":
             artifact.verified_at = datetime.utcnow()
 
+        db.flush()
+        return artifact.to_dict()
+
+
+def update_artifact_tags(artifact_id: int, tags: Optional[Union[List[str], str]]) -> Optional[Dict[str, Any]]:
+    """Update the tags for a given artifact and return its dict."""
+    with get_db() as db:
+        artifact = db.query(Artifact).filter(Artifact.id == artifact_id).first()
+        if not artifact:
+            return None
+        if isinstance(tags, list):
+            tag_str = ",".join([t.strip() for t in tags if t is not None and str(t).strip()])
+        else:
+            tag_str = (tags or "").strip() if tags is not None else None
+        artifact.tags = tag_str if tag_str else None
         db.flush()
         return artifact.to_dict()

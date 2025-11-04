@@ -229,7 +229,7 @@ if PROJECT_DIR not in sys.path:
     sys.path.insert(0, PROJECT_DIR)
 
 try:
-    from database import save_artifact, get_all_artifacts, search_artifacts, get_artifact_by_id, init_db
+    from database import save_artifact, get_all_artifacts, search_artifacts, get_artifact_by_id, init_db, update_artifact_tags
     # Initialize database tables on startup
     init_db()
 except ModuleNotFoundError as e:
@@ -289,17 +289,32 @@ def main():
 def identify_artifact_page():
     """Single artifact identification page."""
     st.header("Identify Single Artifact")
+    
+    # Choose source: Upload or Camera
+    source = st.radio("Image source", ["Upload", "Camera"], horizontal=True)
+    uploaded_file = None
+    camera_photo = None
+    if source == "Upload":
+        uploaded_file = st.file_uploader(
+            "Upload an artifact image",
+            type=["jpg", "jpeg", "png", "webp"],
+            help="Supported formats: JPG, JPEG, PNG, WEBP"
+        )
+    else:
+        camera_photo = st.camera_input("Take a picture (Identify page)", key="identify_camera")
 
-    uploaded_file = st.file_uploader(
-        "Upload an artifact image",
-        type=["jpg", "jpeg", "png", "webp"],
-        help="Supported formats: JPG, JPEG, PNG, WEBP"
-    )
-
+    # Resolve to a PIL image if provided
+    image_input = None
     if uploaded_file is not None:
+        image_input = Image.open(uploaded_file)
+    elif camera_photo is not None:
+        image_input = Image.open(camera_photo)
+
+    if image_input is not None:
         # Clear previous results if a different file is uploaded
-        if 'last_uploaded_file' not in st.session_state or st.session_state['last_uploaded_file'] != uploaded_file.name:
-            st.session_state['last_uploaded_file'] = uploaded_file.name
+        file_key = getattr(uploaded_file, 'name', None) or 'camera_capture'
+        if 'last_uploaded_file' not in st.session_state or st.session_state['last_uploaded_file'] != file_key:
+            st.session_state['last_uploaded_file'] = file_key
             if 'last_analysis' in st.session_state:
                 del st.session_state['last_analysis']
             if 'last_image' in st.session_state:
@@ -310,8 +325,40 @@ def identify_artifact_page():
 
         with col1:
             st.subheader("Uploaded Image")
-            image = Image.open(uploaded_file)
+            image = image_input
             st.image(image, use_container_width=True)
+
+            # Optional cropping UI
+            st.markdown("**Crop Options**")
+            enable_crop = st.checkbox("Crop image", value=False)
+            if enable_crop:
+                w, h = image.size
+                colc1, colc2 = st.columns(2)
+                with colc1:
+                    left_pct = st.slider("Left %", 0, 99, 0)
+                    top_pct = st.slider("Top %", 0, 99, 0)
+                with colc2:
+                    right_pct = st.slider("Right %", 1, 100, 100)
+                    bottom_pct = st.slider("Bottom %", 1, 100, 100)
+
+                # Ensure valid box
+                left = int((left_pct/100.0) * w)
+                top = int((top_pct/100.0) * h)
+                right = int((right_pct/100.0) * w)
+                bottom = int((bottom_pct/100.0) * h)
+                if right <= left:
+                    right = left + 1 if left < w else w
+                if bottom <= top:
+                    bottom = top + 1 if top < h else h
+
+                try:
+                    cropped = image.crop((left, top, right, bottom))
+                except Exception:
+                    cropped = image
+                st.image(cropped, caption="Cropped Preview", use_container_width=True)
+                image_to_use = cropped
+            else:
+                image_to_use = image
 
         with col2:
             st.subheader("Analysis Results")
@@ -356,11 +403,11 @@ def identify_artifact_page():
                     try:
                         # Use fast analyzer
                         analyzer = get_fast_analyzer(selected_tier)
-                        result = analyzer.analyze_artifact(image)
+                        result = analyzer.analyze_artifact(image_to_use)
                         
                         # Store results in session state for persistence
                         st.session_state['last_analysis'] = result
-                        st.session_state['last_image'] = image
+                        st.session_state['last_image'] = image_to_use
 
                     except RuntimeError as e:
                         error_msg = str(e)
@@ -403,10 +450,13 @@ def identify_artifact_page():
                 st.markdown(f"**Quality Tier:** {result.get('tier', 'N/A')}")
 
                 # Option to save to archive (now outside the analyze button block)
+                tags_input = st.text_input("Tags (comma-separated)", placeholder="e.g. pottery, bronze, burial")
                 if st.button("Save to Archive"):
                     try:
                         img_bytes = io.BytesIO()
-                        image.save(img_bytes, format='PNG')
+                        # Use cropped/selected image
+                        image_to_save = st.session_state.get('last_image', image_to_use)
+                        image_to_save.save(img_bytes, format='PNG')
                         artifact_data = {
                             "name": result.get('name', 'Unknown'),
                             "description": result.get('description', ''),
@@ -416,7 +466,8 @@ def identify_artifact_page():
                             "cultural_context": "Requires expert input",
                             "material": "Requires physical inspection",
                             "function": "Inferred from analysis",
-                            "rarity": "Requires comparison"
+                            "rarity": "Requires comparison",
+                            "tags": [t.strip() for t in tags_input.split(',') if t.strip()] if tags_input else None,
                         }
                         artifact_id = save_artifact(artifact_data, img_bytes.getvalue())
                         st.success(f"✅ Artifact saved to archive with ID: {artifact_id}")
@@ -547,6 +598,20 @@ def archive_page():
                     confidence = artifact.get('confidence')
                     st.markdown(f"**Confidence:** {confidence:.2%}" if confidence else "**Confidence:** N/A")
                     st.markdown(f"**Uploaded:** {artifact.get('uploaded_at', 'N/A')}")
+                    st.markdown(f"**Tags:** {artifact.get('tags') or 'N/A'}")
+
+                    edit_tags = st.text_input("Edit Tags (comma-separated)", value=artifact.get('tags') or '', key=f"tags_edit_{artifact_id}")
+                    if st.button("Update Tags", key=f"update_tags_{artifact_id}"):
+                        try:
+                            new_tags_list = [t.strip() for t in edit_tags.split(',') if t.strip()]
+                            updated = update_artifact_tags(artifact_id, new_tags_list)
+                            if updated:
+                                st.session_state['selected_artifact'] = artifact_id  # keep selection
+                                st.success("Tags updated.")
+                            else:
+                                st.warning("Artifact not found.")
+                        except Exception as e:
+                            st.error(f"Failed to update tags: {str(e)}")
 
     except Exception as e:
         st.error(f"Error loading archive: {str(e)}")
@@ -562,10 +627,16 @@ def search_page():
         placeholder="Enter keywords to search...",
         help="Search by name, description, material, or cultural context"
     )
+    tags_filter_input = st.text_input(
+        "Filter by tags (comma-separated)",
+        placeholder="e.g. pottery, bronze"
+    )
 
-    if search_query:
+    tags_filter_list = [t.strip() for t in tags_filter_input.split(',') if t.strip()] if tags_filter_input else None
+
+    if search_query or tags_filter_list:
         try:
-            results = search_artifacts(search_query, limit=20)
+            results = search_artifacts(search_query or "", limit=20, tags=tags_filter_list)
 
             if results:
                 st.success(f"Found {len(results)} matching artifacts")
@@ -580,6 +651,7 @@ def search_page():
                             st.markdown(f"**Description:** {artifact.get('description', 'N/A')}")
                             st.markdown(f"**Material:** {artifact.get('material', 'N/A')}")
                             st.markdown(f"**Cultural Context:** {artifact.get('cultural_context', 'N/A')}")
+                            st.markdown(f"**Tags:** {artifact.get('tags') or 'N/A'}")
             else:
                 st.info("No artifacts found matching your search.")
 
