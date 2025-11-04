@@ -183,10 +183,17 @@ def get_all_artifacts(
         return results
 
 
-def get_artifact_by_id(artifact_id: int) -> Optional[Artifact]:
+def get_artifact_by_id(artifact_id: int) -> Optional[Dict[str, Any]]:
     """Fetch a single artifact by its primary key."""
     with get_db() as db:
-        return db.query(Artifact).filter(Artifact.id == artifact_id).first()
+        artifact = db.query(Artifact).filter(Artifact.id == artifact_id).first()
+        if not artifact:
+            return None
+        # Convert to dict and include image data to avoid detached instance errors
+        data = artifact.to_dict()
+        if artifact.image_data:
+            data["image_data"] = artifact.image_data
+        return data
 
 
 def search_artifacts(query: str, limit: int = 50) -> List[Dict[str, Any]]:

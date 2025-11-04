@@ -229,7 +229,9 @@ if PROJECT_DIR not in sys.path:
     sys.path.insert(0, PROJECT_DIR)
 
 try:
-    from database import save_artifact, get_all_artifacts, search_artifacts, get_artifact_by_id
+    from database import save_artifact, get_all_artifacts, search_artifacts, get_artifact_by_id, init_db
+    # Initialize database tables on startup
+    init_db()
 except ModuleNotFoundError as e:
     if getattr(e, "name", None) == "database":
         st.error("Database module not found. Please ensure database.py is available.")
@@ -295,6 +297,14 @@ def identify_artifact_page():
     )
 
     if uploaded_file is not None:
+        # Clear previous results if a different file is uploaded
+        if 'last_uploaded_file' not in st.session_state or st.session_state['last_uploaded_file'] != uploaded_file.name:
+            st.session_state['last_uploaded_file'] = uploaded_file.name
+            if 'last_analysis' in st.session_state:
+                del st.session_state['last_analysis']
+            if 'last_image' in st.session_state:
+                del st.session_state['last_image']
+        
         # Display the uploaded image
         col1, col2 = st.columns([1, 1])
 
@@ -347,31 +357,10 @@ def identify_artifact_page():
                         # Use fast analyzer
                         analyzer = get_fast_analyzer(selected_tier)
                         result = analyzer.analyze_artifact(image)
-
-                        st.success(f"✅ Analysis Complete in {result.get('analysis_time', 'N/A')}!")
-                        st.markdown(f"**Name:** {result.get('name', 'Unknown')}")
-                        st.markdown(f"**Description:** {result.get('description', 'N/A')}")
-                        st.markdown(f"**Confidence:** {result.get('confidence', 0):.2%}")
-                        st.markdown(f"**Method:** {result.get('method', 'N/A')}")
-                        st.markdown(f"**Quality Tier:** {result.get('tier', 'N/A')}")
-
-                        # Option to save to archive
-                        if st.button("Save to Archive"):
-                            img_bytes = io.BytesIO()
-                            image.save(img_bytes, format='PNG')
-                            artifact_data = {
-                                "name": result.get('name', 'Unknown'),
-                                "description": result.get('description', ''),
-                                "confidence": result.get('confidence', 0.0),
-                                "value": "Requires expert appraisal",
-                                "age": "Requires expert analysis",
-                                "cultural_context": "Requires expert input",
-                                "material": "Requires physical inspection",
-                                "function": "Inferred from analysis",
-                                "rarity": "Requires comparison"
-                            }
-                            artifact_id = save_artifact(artifact_data, img_bytes.getvalue())
-                            st.success(f"Artifact saved to archive with ID: {artifact_id}")
+                        
+                        # Store results in session state for persistence
+                        st.session_state['last_analysis'] = result
+                        st.session_state['last_image'] = image
 
                     except RuntimeError as e:
                         error_msg = str(e)
@@ -399,6 +388,41 @@ def identify_artifact_page():
                             st.exception(e)
                     except Exception as e:
                         st.error(f"Unexpected error: {str(e)}")
+                        st.exception(e)
+            
+            # Display results if available (persists across reruns)
+            if 'last_analysis' in st.session_state:
+                result = st.session_state['last_analysis']
+                image = st.session_state['last_image']
+                
+                st.success(f"✅ Analysis Complete in {result.get('analysis_time', 'N/A')}!")
+                st.markdown(f"**Name:** {result.get('name', 'Unknown')}")
+                st.markdown(f"**Description:** {result.get('description', 'N/A')}")
+                st.markdown(f"**Confidence:** {result.get('confidence', 0):.2%}")
+                st.markdown(f"**Method:** {result.get('method', 'N/A')}")
+                st.markdown(f"**Quality Tier:** {result.get('tier', 'N/A')}")
+
+                # Option to save to archive (now outside the analyze button block)
+                if st.button("Save to Archive"):
+                    try:
+                        img_bytes = io.BytesIO()
+                        image.save(img_bytes, format='PNG')
+                        artifact_data = {
+                            "name": result.get('name', 'Unknown'),
+                            "description": result.get('description', ''),
+                            "confidence": result.get('confidence', 0.0),
+                            "value": "Requires expert appraisal",
+                            "age": "Requires expert analysis",
+                            "cultural_context": "Requires expert input",
+                            "material": "Requires physical inspection",
+                            "function": "Inferred from analysis",
+                            "rarity": "Requires comparison"
+                        }
+                        artifact_id = save_artifact(artifact_data, img_bytes.getvalue())
+                        st.success(f"✅ Artifact saved to archive with ID: {artifact_id}")
+                        st.balloons()
+                    except Exception as e:
+                        st.error(f"Error saving artifact: {str(e)}")
                         st.exception(e)
 
 
@@ -503,25 +527,26 @@ def archive_page():
             artifact = get_artifact_by_id(artifact_id)
             if artifact:
                 st.divider()
-                st.subheader(f"Artifact Details: {artifact.name}")
+                st.subheader(f"Artifact Details: {artifact['name']}")
 
                 col1, col2 = st.columns([1, 2])
                 with col1:
-                    if artifact.image_data:
-                        img = Image.open(io.BytesIO(artifact.image_data))
+                    if artifact.get('image_data'):
+                        img = Image.open(io.BytesIO(artifact['image_data']))
                         st.image(img, use_container_width=True)
 
                 with col2:
-                    st.markdown(f"**Name:** {artifact.name}")
-                    st.markdown(f"**Description:** {artifact.description or 'N/A'}")
-                    st.markdown(f"**Material:** {artifact.material or 'N/A'}")
-                    st.markdown(f"**Age:** {artifact.age or 'N/A'}")
-                    st.markdown(f"**Cultural Context:** {artifact.cultural_context or 'N/A'}")
-                    st.markdown(f"**Function:** {artifact.function or 'N/A'}")
-                    st.markdown(f"**Rarity:** {artifact.rarity or 'N/A'}")
-                    st.markdown(f"**Value:** {artifact.value or 'N/A'}")
-                    st.markdown(f"**Confidence:** {artifact.confidence:.2%}" if artifact.confidence else "**Confidence:** N/A")
-                    st.markdown(f"**Uploaded:** {artifact.uploaded_at}")
+                    st.markdown(f"**Name:** {artifact.get('name', 'N/A')}")
+                    st.markdown(f"**Description:** {artifact.get('description') or 'N/A'}")
+                    st.markdown(f"**Material:** {artifact.get('material') or 'N/A'}")
+                    st.markdown(f"**Age:** {artifact.get('age') or 'N/A'}")
+                    st.markdown(f"**Cultural Context:** {artifact.get('cultural_context') or 'N/A'}")
+                    st.markdown(f"**Function:** {artifact.get('function') or 'N/A'}")
+                    st.markdown(f"**Rarity:** {artifact.get('rarity') or 'N/A'}")
+                    st.markdown(f"**Value:** {artifact.get('value') or 'N/A'}")
+                    confidence = artifact.get('confidence')
+                    st.markdown(f"**Confidence:** {confidence:.2%}" if confidence else "**Confidence:** N/A")
+                    st.markdown(f"**Uploaded:** {artifact.get('uploaded_at', 'N/A')}")
 
     except Exception as e:
         st.error(f"Error loading archive: {str(e)}")
