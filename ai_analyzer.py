@@ -192,5 +192,18 @@ class AIAnalyzer:
         elif model_choice == "clip":
             embedding = self.get_embedding(image)
             return {"embedding": embedding.tolist()}
+        elif model_choice == "ollama":
+            prompt = (
+                "You are an expert archaeologist. Analyze the image carefully and "
+                "describe the artifact: its type, material, age, cultural origin, "
+                "and possible historical function in 2–3 sentences."
+            )
+            description = self.ollama.generate(prompt, image=image).strip()
+            return {
+                "name": description.split(".")[0] if description else "Unknown artifact",
+                "description": description,
+                "confidence": 1.0,
+                "embedding": self.get_embedding(image).tolist(),
+            }
         else:
             raise ValueError(f"Unknown model_choice: {model_choice}")
