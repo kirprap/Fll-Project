@@ -104,31 +104,35 @@ def main():
         st.session_state['view_mode'] = 'gallery'
 
     # Top toolbar
-    tb1, tb2, tb3, tb4 = st.columns([0.5, 6, 0.3, 0.8])
+    tb1, tb2, tb3, tb4 = st.columns([0.5, 6, 0.3, 0.3])
     with tb1:
-        show_back = ('selected_artifact' in st.session_state) or (st.session_state.get('view_mode') == 'add')
+        show_back = st.session_state.get('view_mode') == 'add' or ('selected_artifact' in st.session_state)
         if show_back and st.button('←', use_container_width=True):
-            # Clear selection and return to gallery
             if 'selected_artifact' in st.session_state:
                 del st.session_state['selected_artifact']
             st.session_state['view_mode'] = 'gallery'
             q = qp.get('q')
-            set_qp(q=q)  # preserve search if any
+            set_qp(q=q)
             _safe_rerun()
     with tb2:
         search_val = qp.get('q', '')
-        new_search = st.text_input('Search', value=search_val, placeholder='Search by name, description, material, or tags')
+        new_search = st.text_input('', value=search_val, placeholder='Search by name, description, material, or tags', label_visibility='collapsed')
     with tb3:
-        if st.button('🔎', use_container_width=False):
+        if st.button('🔎', use_container_width=True):
             set_qp(q=new_search or None)
             _safe_rerun()
     with tb4:
-        if st.button('➕', use_container_width=False):
+        if st.button('➕', use_container_width=True):
             if 'selected_artifact' in st.session_state:
                 del st.session_state['selected_artifact']
             st.session_state['view_mode'] = 'add'
-            set_qp(q=qp.get('q'))
-            _safe_rerun()
+    st.markdown(
+        '<style>'
+        'div[data-testid="stHorizontalBlock"] input {height:40px; margin-bottom:0;}'
+        'div.stButton > button {height:40px; padding-top:0; padding-bottom:0; margin-bottom:0;}'
+        '</style>',
+        unsafe_allow_html=True
+    )
 
     # Route views
     if st.session_state.get('view_mode') == 'add':
@@ -341,6 +345,12 @@ def archive_page():
         except Exception:
             qp = {k: v[0] if isinstance(v, list) and v else v for k, v in st.experimental_get_query_params().items()}
         search_q = (qp.get('q') or '').strip()
+        artifact_qp = qp.get('artifact')
+        if artifact_qp and 'selected_artifact' not in st.session_state:
+            try:
+                st.session_state['selected_artifact'] = int(artifact_qp)
+            except Exception:
+                pass
 
         # If an artifact is selected, show only its detail page
         if 'selected_artifact' in st.session_state:
@@ -348,25 +358,26 @@ def archive_page():
             artifact = get_artifact_by_id(artifact_id)
             if artifact:
                 st.subheader(artifact.get('name', 'Artifact'))
-                # Large image on top
-                if artifact.get('image_data'):
-                    img = Image.open(io.BytesIO(artifact['image_data']))
-                    st.image(img, use_container_width=True)
-                # Details section
-                st.markdown(f"**Description:** {artifact.get('description') or 'N/A'}")
-                colA, colB, colC = st.columns(3)
-                with colA:
-                    st.markdown(f"**Material:** {artifact.get('material') or 'N/A'}")
-                    st.markdown(f"**Age:** {artifact.get('age') or 'N/A'}")
-                with colB:
-                    st.markdown(f"**Cultural Context:** {artifact.get('cultural_context') or 'N/A'}")
-                    st.markdown(f"**Function:** {artifact.get('function') or 'N/A'}")
-                with colC:
-                    st.markdown(f"**Rarity:** {artifact.get('rarity') or 'N/A'}")
-                    st.markdown(f"**Value:** {artifact.get('value') or 'N/A'}")
-                confidence = artifact.get('confidence')
-                st.markdown(f"**Confidence:** {confidence:.2%}" if confidence else "**Confidence:** N/A")
-                st.markdown(f"**Uploaded:** {artifact.get('uploaded_at', 'N/A')}")
+                left, right = st.columns([1, 2])
+                with left:
+                    if artifact.get('image_data'):
+                        img = Image.open(io.BytesIO(artifact['image_data']))
+                        st.image(img, use_container_width=True)
+                with right:
+                    st.markdown(f"**Description:** {artifact.get('description') or 'N/A'}")
+                    colA, colB, colC = st.columns(3)
+                    with colA:
+                        st.markdown(f"**Material:** {artifact.get('material') or 'N/A'}")
+                        st.markdown(f"**Age:** {artifact.get('age') or 'N/A'}")
+                    with colB:
+                        st.markdown(f"**Cultural Context:** {artifact.get('cultural_context') or 'N/A'}")
+                        st.markdown(f"**Function:** {artifact.get('function') or 'N/A'}")
+                    with colC:
+                        st.markdown(f"**Rarity:** {artifact.get('rarity') or 'N/A'}")
+                        st.markdown(f"**Value:** {artifact.get('value') or 'N/A'}")
+                    confidence = artifact.get('confidence')
+                    st.markdown(f"**Confidence:** {confidence:.2%}" if confidence else "**Confidence:** N/A")
+                    st.markdown(f"**Uploaded:** {artifact.get('uploaded_at', 'N/A')}")
 
                 # Clickable tags that trigger search
                 tags_str = artifact.get('tags') or ''
@@ -436,11 +447,26 @@ def archive_page():
                             if artifact.get('image_base64'):
                                 thumb_b64 = _make_square_thumbnail_b64(artifact['image_base64'], size=300)
                                 st.markdown(
-                                    f'<a href="?artifact={artifact.get("id")}"><img src="data:image/png;base64,{thumb_b64}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;" /></a>',
+                                    f'<a href="?artifact={artifact.get("id")}" target="_self"><img src="data:image/png;base64,{thumb_b64}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid #ccc" /></a>',
                                     unsafe_allow_html=True
                                 )
                             st.markdown(f"**{artifact.get('name', 'Unknown')}**")
                             st.caption(f"ID: {artifact.get('id')} | Uploaded: {artifact.get('uploaded_at', 'N/A')}")
+                            tags_str = artifact.get('tags') or ''
+                            tags = [t.strip() for t in tags_str.split(',') if t.strip()]
+                            if tags:
+                                st.markdown("**Tags:**")
+                                tcols = st.columns(min(4, len(tags)))
+                                for idx, tag in enumerate(tags):
+                                    with tcols[idx % len(tcols)]:
+                                        if st.button(f"#{tag}", key=f"grid_tag_{artifact.get('id')}_{idx}"):
+                                            try:
+                                                st.query_params['q'] = tag
+                                            except Exception:
+                                                st.experimental_set_query_params(q=tag)
+                                            if 'selected_artifact' in st.session_state:
+                                                del st.session_state['selected_artifact']
+                                            _safe_rerun()
 
     except Exception as e:
         st.error(f"Error loading archive: {str(e)}")
@@ -451,19 +477,24 @@ def search_page():
     """Search page for finding artifacts."""
     st.header("Search Artifacts")
 
-    search_query = st.text_input(
-        "Search artifacts",
-        placeholder="Enter keywords to search...",
-        help="Search by name, description, material, or cultural context"
-    )
-    tags_filter_input = st.text_input(
-        "Filter by tags (comma-separated)",
-        placeholder="e.g. pottery, bronze"
-    )
+    col1, col2, col3 = st.columns([3, 2, 1])
+    with col1:
+        search_query = st.text_input(
+            "Search",
+            placeholder="Enter keywords to search...",
+            help="Search by name, description, material, or cultural context"
+        )
+    with col2:
+        tags_filter_input = st.text_input(
+            "Tags",
+            placeholder="e.g. pottery, bronze"
+        )
+    with col3:
+        do_search = st.button("Search")
 
     tags_filter_list = [t.strip() for t in tags_filter_input.split(',') if t.strip()] if tags_filter_input else None
 
-    if search_query or tags_filter_list:
+    if do_search or search_query or tags_filter_list:
         try:
             results = search_artifacts(search_query or "", limit=20, tags=tags_filter_list)
 

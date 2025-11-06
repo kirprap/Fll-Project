@@ -13,3 +13,6 @@ __pycache__/
 Thumbs.db
 .vs/
 .streamlit/
+env/
+dist/
+build/
