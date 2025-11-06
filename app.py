@@ -104,7 +104,7 @@ def main():
         st.session_state['view_mode'] = 'gallery'
 
     # Top toolbar
-    tb1, tb2, tb3, tb4 = st.columns([0.5, 6, 0.8, 0.8])
+    tb1, tb2, tb3, tb4 = st.columns([0.5, 6, 0.3, 0.8])
     with tb1:
         show_back = ('selected_artifact' in st.session_state) or (st.session_state.get('view_mode') == 'add')
         if show_back and st.button('←', use_container_width=True):
@@ -119,11 +119,11 @@ def main():
         search_val = qp.get('q', '')
         new_search = st.text_input('Search', value=search_val, placeholder='Search by name, description, material, or tags')
     with tb3:
-        if st.button('🔎', use_container_width=True):
+        if st.button('🔎', use_container_width=False):
             set_qp(q=new_search or None)
             _safe_rerun()
     with tb4:
-        if st.button('+', use_container_width=True):
+        if st.button('➕', use_container_width=False):
             if 'selected_artifact' in st.session_state:
                 del st.session_state['selected_artifact']
             st.session_state['view_mode'] = 'add'
