@@ -299,12 +299,6 @@ def identify_artifact_page():
                             "name": result.get('name', 'Unknown'),
                             "description": result.get('description', ''),
                             "confidence": result.get('confidence', 0.0),
-                            "value": "Requires expert appraisal",
-                            "age": "Requires expert analysis",
-                            "cultural_context": "Requires expert input",
-                            "material": "Requires physical inspection",
-                            "function": "Inferred from analysis",
-                            "rarity": "Requires comparison",
                             "tags": [t.strip() for t in tags_input.split(',') if t.strip()] if tags_input else None,
                         }
                         artifact_id = save_artifact(artifact_data, img_bytes.getvalue())
@@ -365,16 +359,6 @@ def archive_page():
                         st.image(img, use_container_width=True)
                 with right:
                     st.markdown(f"**Description:** {artifact.get('description') or 'N/A'}")
-                    colA, colB, colC = st.columns(3)
-                    with colA:
-                        st.markdown(f"**Material:** {artifact.get('material') or 'N/A'}")
-                        st.markdown(f"**Age:** {artifact.get('age') or 'N/A'}")
-                    with colB:
-                        st.markdown(f"**Cultural Context:** {artifact.get('cultural_context') or 'N/A'}")
-                        st.markdown(f"**Function:** {artifact.get('function') or 'N/A'}")
-                    with colC:
-                        st.markdown(f"**Rarity:** {artifact.get('rarity') or 'N/A'}")
-                        st.markdown(f"**Value:** {artifact.get('value') or 'N/A'}")
                     confidence = artifact.get('confidence')
                     st.markdown(f"**Confidence:** {confidence:.2%}" if confidence else "**Confidence:** N/A")
                     st.markdown(f"**Uploaded:** {artifact.get('uploaded_at', 'N/A')}")
