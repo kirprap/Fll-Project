@@ -4,6 +4,8 @@ from PIL import Image, ImageOps
 import logging
 import sys
 import os
+import html
+from urllib.parse import quote_plus
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +28,16 @@ if PROJECT_DIR not in sys.path:
     sys.path.insert(0, PROJECT_DIR)
 
 try:
-    from database import save_artifact, get_all_artifacts, search_artifacts, get_artifact_by_id, init_db, update_artifact_tags
+    from database import (
+        save_artifact,
+        get_all_artifacts,
+        search_artifacts,
+        get_artifact_by_id,
+        init_db,
+        update_artifact_tags,
+        delete_artifact,
+        _normalize_tags_input,
+    )
     # Initialize database tables on startup
     init_db()
 except ModuleNotFoundError as e:
@@ -65,6 +76,93 @@ def _safe_rerun():
             pass
 
 
+# Reusable CSS for evenly spaced tag chips (approx 10px gap)
+TAG_CHIP_STYLE = """
+<style>
+.tag-chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 0.25rem;
+}
+.tag-chip {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 999px;
+    color: #333333;
+    font-size: 0.85rem;
+    text-decoration: none;
+    border: 1px solid #dfe3e8;
+    transition: background-color 0.15s ease;
+}
+.tag-chip:hover {
+    text-decoration: none;
+}
+</style>
+"""
+
+
+def render_tag_chips(tags: List[str]) -> None:
+    """Render clickable tag chips with consistent spacing using query params."""
+    if not tags:
+        return
+
+    chips: List[str] = []
+    for tag in tags:
+        if not tag:
+            continue
+        safe_label = html.escape(tag)
+        href = f"?q={quote_plus(tag)}"
+        chips.append(f'<a class="tag-chip" href="{href}">#{safe_label}</a>')
+
+    if chips:
+        st.markdown(
+            f'<div class="tag-chip-container">{"".join(chips)}</div>',
+            unsafe_allow_html=True,
+        )
+
+
+def _supports_new_query_api() -> bool:
+    if not hasattr(st, "query_params"):
+        return False
+    try:
+        st.query_params  # type: ignore[attr-defined]
+        return True
+    except Exception:
+        return False
+
+
+_HAS_NEW_QUERY_API = _supports_new_query_api()
+
+
+def get_query_params() -> Dict[str, Any]:
+    if _HAS_NEW_QUERY_API:
+        return dict(st.query_params)  # type: ignore[arg-type]
+    raw_qp = st.experimental_get_query_params()
+    return {k: v[0] if isinstance(v, list) and v else v for k, v in raw_qp.items()}
+
+
+def set_query_params(**kwargs: Optional[Any]) -> None:
+    entries = {k: str(v) for k, v in kwargs.items() if v is not None}
+    if _HAS_NEW_QUERY_API:
+        qp = st.query_params  # type: ignore[assignment]
+        qp.clear()
+        for key, value in entries.items():
+            qp[key] = value
+    else:
+        st.experimental_set_query_params(**entries)
+
+
+def update_query_params(**kwargs: Optional[Any]) -> None:
+    current = get_query_params()
+    for key, value in kwargs.items():
+        if value is None:
+            current.pop(key, None)
+        else:
+            current[key] = str(value)
+    set_query_params(**current)
+
+
 def main():
     """Main Streamlit application."""
     st.set_page_config(
@@ -75,51 +173,36 @@ def main():
     )
 
     st.title("🏺 Artifact Gallery")
-
-    # Query params helpers (support older/newer Streamlit)
-    def get_qp():
-        try:
-            return dict(st.query_params)
-        except Exception:
-            return {k: v[0] if isinstance(v, list) and v else v for k, v in st.experimental_get_query_params().items()}
-
-    def set_qp(**kwargs):
-        try:
-            st.query_params.clear()
-            for k, v in kwargs.items():
-                if v is not None:
-                    st.query_params[k] = v
-        except Exception:
-            st.experimental_set_query_params(**{k: v for k, v in kwargs.items() if v is not None})
+    st.markdown(TAG_CHIP_STYLE, unsafe_allow_html=True)
 
     # Session defaults
     if 'view_mode' not in st.session_state:
         st.session_state['view_mode'] = 'gallery'  # 'gallery' | 'add'
 
     # Sync selected artifact from query params
-    qp = get_qp()
+    qp = get_query_params()
     selected_from_qp = qp.get('artifact')
     if selected_from_qp:
         st.session_state['selected_artifact'] = int(selected_from_qp)
         st.session_state['view_mode'] = 'gallery'
+    elif qp.get('q') and 'selected_artifact' in st.session_state and st.session_state.get('view_mode') != 'add':
+        # Navigating via tag/search clears current selection
+        st.session_state.pop('selected_artifact', None)
 
     # Top toolbar
-    tb1, tb2, tb3, tb4 = st.columns([0.5, 6, 0.3, 0.3])
+    tb1, tb2, tb3, tb4 = st.columns([0.9, 6, 0.3, 0.3])
     with tb1:
-        show_back = st.session_state.get('view_mode') == 'add' or ('selected_artifact' in st.session_state)
-        if show_back and st.button('←', use_container_width=True):
-            if 'selected_artifact' in st.session_state:
-                del st.session_state['selected_artifact']
+        if st.button('🏠 Home', use_container_width=True):
+            st.session_state.pop('selected_artifact', None)
             st.session_state['view_mode'] = 'gallery'
-            q = qp.get('q')
-            set_qp(q=q)
+            set_query_params()
             _safe_rerun()
     with tb2:
         search_val = qp.get('q', '')
         new_search = st.text_input('', value=search_val, placeholder='Search by name, description, material, or tags', label_visibility='collapsed')
     with tb3:
         if st.button('🔎', use_container_width=True):
-            set_qp(q=new_search or None)
+            set_query_params(q=new_search or None)
             _safe_rerun()
     with tb4:
         if st.button('➕', use_container_width=True):
@@ -133,6 +216,11 @@ def main():
         '</style>',
         unsafe_allow_html=True
     )
+
+    # Show any queued toast messages
+    remove_notice = st.session_state.pop('remove_notice', None)
+    if remove_notice:
+        st.success(remove_notice)
 
     # Route views
     if st.session_state.get('view_mode') == 'add':
@@ -295,11 +383,12 @@ def identify_artifact_page():
                         # Use cropped/selected image
                         image_to_save = st.session_state.get('last_image', image_to_use)
                         image_to_save.save(img_bytes, format='PNG')
+                        tags_list = _normalize_tags_input(tags_input)
                         artifact_data = {
                             "name": result.get('name', 'Unknown'),
                             "description": result.get('description', ''),
                             "confidence": result.get('confidence', 0.0),
-                            "tags": [t.strip() for t in tags_input.split(',') if t.strip()] if tags_input else None,
+                            "tags": tags_list,
                         }
                         artifact_id = save_artifact(artifact_data, img_bytes.getvalue())
                         st.success(f"✅ Artifact saved to archive with ID: {artifact_id}")
@@ -334,10 +423,7 @@ def archive_page():
 
     try:
         # Determine search from query params
-        try:
-            qp = dict(st.query_params)
-        except Exception:
-            qp = {k: v[0] if isinstance(v, list) and v else v for k, v in st.experimental_get_query_params().items()}
+        qp = get_query_params()
         search_q = (qp.get('q') or '').strip()
         artifact_qp = qp.get('artifact')
         if artifact_qp and 'selected_artifact' not in st.session_state:
@@ -364,28 +450,17 @@ def archive_page():
                     st.markdown(f"**Uploaded:** {artifact.get('uploaded_at', 'N/A')}")
 
                 # Clickable tags that trigger search
-                tags_str = artifact.get('tags') or ''
-                tags = [t.strip() for t in tags_str.split(',') if t.strip()]
+                tags = _normalize_tags_input(artifact.get('tags'))
                 if tags:
                     st.markdown("**Tags:**")
-                    tcols = st.columns(min(4, len(tags)))
-                    for idx, tag in enumerate(tags):
-                        with tcols[idx % len(tcols)]:
-                            if st.button(f"#{tag}", key=f"tag_{artifact_id}_{idx}"):
-                                try:
-                                    st.query_params['q'] = tag
-                                except Exception:
-                                    st.experimental_set_query_params(q=tag)
-                                # Clear selection to show search results
-                                if 'selected_artifact' in st.session_state:
-                                    del st.session_state['selected_artifact']
-                                _safe_rerun()
-                
+                    render_tag_chips(tags)
+
                 # Tag editing
-                edit_tags = st.text_input("Edit Tags (comma-separated)", value=artifact.get('tags') or '', key=f"tags_edit_{artifact_id}")
+                edit_tags_default = ", ".join(tags)
+                edit_tags = st.text_input("Edit Tags (comma-separated)", value=edit_tags_default, key=f"tags_edit_{artifact_id}")
                 if st.button("Update Tags", key=f"update_tags_{artifact_id}"):
                     try:
-                        new_tags_list = [t.strip() for t in edit_tags.split(',') if t.strip()]
+                        new_tags_list = _normalize_tags_input(edit_tags)
                         updated = update_artifact_tags(artifact_id, new_tags_list)
                         if updated:
                             st.session_state['selected_artifact'] = artifact_id
@@ -394,6 +469,23 @@ def archive_page():
                             st.warning("Artifact not found.")
                     except Exception as e:
                         st.error(f"Failed to update tags: {str(e)}")
+
+                if st.button("Delete Artifact", key=f"delete_artifact_{artifact_id}"):
+                    try:
+                        deleted = delete_artifact(artifact_id)
+                        if deleted:
+                            st.session_state.pop('selected_artifact', None)
+                            st.session_state['remove_notice'] = "Artifact removed from archive."
+                            existing_q = search_q if search_q else None
+                            if existing_q:
+                                set_query_params(q=existing_q)
+                            else:
+                                set_query_params()
+                            _safe_rerun()
+                        else:
+                            st.warning("Artifact not found.")
+                    except Exception as e:
+                        st.error(f"Failed to delete artifact: {str(e)}")
             return
 
         # Otherwise, show gallery grid (optionally filtered)
@@ -436,21 +528,26 @@ def archive_page():
                                 )
                             st.markdown(f"**{artifact.get('name', 'Unknown')}**")
                             st.caption(f"ID: {artifact.get('id')} | Uploaded: {artifact.get('uploaded_at', 'N/A')}")
-                            tags_str = artifact.get('tags') or ''
-                            tags = [t.strip() for t in tags_str.split(',') if t.strip()]
+                            tags = _normalize_tags_input(artifact.get('tags'))
                             if tags:
                                 st.markdown("**Tags:**")
-                                tcols = st.columns(min(4, len(tags)))
-                                for idx, tag in enumerate(tags):
-                                    with tcols[idx % len(tcols)]:
-                                        if st.button(f"#{tag}", key=f"grid_tag_{artifact.get('id')}_{idx}"):
-                                            try:
-                                                st.query_params['q'] = tag
-                                            except Exception:
-                                                st.experimental_set_query_params(q=tag)
-                                            if 'selected_artifact' in st.session_state:
-                                                del st.session_state['selected_artifact']
-                                            _safe_rerun()
+                                render_tag_chips(tags)
+
+                            if st.button("Remove", key=f"remove_artifact_{artifact.get('id')}"):
+                                try:
+                                    deleted = delete_artifact(artifact.get('id'))
+                                    if deleted:
+                                        st.session_state.pop('selected_artifact', None)
+                                        st.session_state['remove_notice'] = "Artifact removed from archive."
+                                        if search_q:
+                                            set_query_params(q=search_q)
+                                        else:
+                                            set_query_params()
+                                        _safe_rerun()
+                                    else:
+                                        st.warning("Artifact not found.")
+                                except Exception as e:
+                                    st.error(f"Failed to delete artifact: {str(e)}")
 
     except Exception as e:
         st.error(f"Error loading archive: {str(e)}")
@@ -476,7 +573,9 @@ def search_page():
     with col3:
         do_search = st.button("Search")
 
-    tags_filter_list = [t.strip() for t in tags_filter_input.split(',') if t.strip()] if tags_filter_input else None
+    tags_filter_list = None
+    if tags_filter_input and tags_filter_input.strip():
+        tags_filter_list = _normalize_tags_input(tags_filter_input)
 
     if do_search or search_query or tags_filter_list:
         try:

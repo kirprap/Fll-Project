@@ -153,9 +153,32 @@ def get_db():
         db.close()
 
 
+def _normalize_tags_input(tags: Optional[Union[List[str], str]]) -> List[str]:
+    """Return a de-duplicated list of trimmed tags, collapsing extra spaces."""
+    if tags is None:
+        return []
+
+    if isinstance(tags, str):
+        candidates: List[str] = [tags]
+    else:
+        candidates = [str(t) for t in tags if t is not None]
+
+    seen = set()
+    normalized: List[str] = []
+    for item in candidates:
+        fragments = item.replace("\n", ",").split(",")
+        for fragment in fragments:
+            cleaned = " ".join(fragment.strip().split())
+            if cleaned and cleaned not in seen:
+                seen.add(cleaned)
+                normalized.append(cleaned)
+    return normalized
+
+
 def save_artifact(artifact_data: Dict[str, Any], image_bytes: bytes) -> int:
     """Persist a newly analysed artifact and return its primary key."""
     with get_db() as db:
+        tags_list = _normalize_tags_input(artifact_data.get("tags"))
         artifact = Artifact(
             name=artifact_data.get("name", "Unknown"),
             value=artifact_data.get("value", "Unknown"),
@@ -168,10 +191,7 @@ def save_artifact(artifact_data: Dict[str, Any], image_bytes: bytes) -> int:
             confidence=artifact_data.get("confidence", 0.0),
             image_data=image_bytes,
             analyzed_at=datetime.utcnow(),
-            tags=(
-                ",".join(artifact_data["tags"]) if isinstance(artifact_data.get("tags"), list)
-                else artifact_data.get("tags")
-            ),
+            tags=",".join(tags_list) if tags_list else None,
         )
         db.add(artifact)
         db.flush()  # Obtain PK without committing twice
@@ -228,11 +248,10 @@ def search_artifacts(query: str, limit: int = 50, tags: Optional[List[str]] = No
             | (Artifact.cultural_context.ilike(pattern))
             | (Artifact.material.ilike(pattern))
         )
-        if tags:
-            for t in tags:
-                t = (t or "").strip()
-                if t:
-                    q = q.filter(Artifact.tags.ilike(f"%{t}%"))
+        tag_filters = _normalize_tags_input(tags)
+        if tag_filters:
+            for t in tag_filters:
+                q = q.filter(Artifact.tags.ilike(f"%{t}%"))
         artifacts = q.order_by(Artifact.uploaded_at.desc()).limit(limit).all()
         return [a.to_dict() for a in artifacts]
 
@@ -267,10 +286,18 @@ def update_artifact_tags(artifact_id: int, tags: Optional[Union[List[str], str]]
         artifact = db.query(Artifact).filter(Artifact.id == artifact_id).first()
         if not artifact:
             return None
-        if isinstance(tags, list):
-            tag_str = ",".join([t.strip() for t in tags if t is not None and str(t).strip()])
-        else:
-            tag_str = (tags or "").strip() if tags is not None else None
-        artifact.tags = tag_str if tag_str else None
+        tags_list = _normalize_tags_input(tags)
+        artifact.tags = ",".join(tags_list) if tags_list else None
         db.flush()
         return artifact.to_dict()
+
+
+def delete_artifact(artifact_id: int) -> bool:
+    """Delete an artifact by id. Returns True if deleted."""
+    with get_db() as db:
+        artifact = db.query(Artifact).filter(Artifact.id == artifact_id).first()
+        if not artifact:
+            return False
+        db.delete(artifact)
+        db.flush()
+        return True
