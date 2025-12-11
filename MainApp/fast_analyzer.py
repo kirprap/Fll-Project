@@ -1,5 +1,5 @@
 """
-Fast AI Analyzer - Optimized for <2 minute response times
+Fast AI Analyzer - Optimized for <3 minute response times
 Provides multiple speed/quality tiers
 """
 
