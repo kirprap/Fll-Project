@@ -16,7 +16,7 @@ export default function Login() {
   
   const handleLogin = () => {
     // Saves Cookies (Hopefully)
-    Cookies.set(username, username, { expires: 7  });
+    Cookies.set(username, password, { expires: 7 });
     console.log(username); // Shows user
   };
 
