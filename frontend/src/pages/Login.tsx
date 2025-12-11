@@ -18,6 +18,9 @@ export default function Login() {
     // Saves Cookies (Hopefully)
     Cookies.set(username, password, { expires: 7, path:'/' });
     console.log(username); // Shows user
+    console.log(password)
+    console.log("It worked")
+  
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
