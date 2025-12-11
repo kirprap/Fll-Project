@@ -17,9 +17,9 @@ export default function Login() {
   const handleLogin = () => {
     // Saves Cookies (Hopefully)
     Cookies.set(username, password, { expires: 7, path:'/' });
-    console.log(username); // Shows user
-    console.log(password)
-    console.log("It worked")
+    console.log("Username:" + username + " " + "Password:" + password )
+    console.log()
+
   
   };
 
