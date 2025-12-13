@@ -23,6 +23,41 @@ export default function ArtifactGallery() {
     loadArtifacts(query)
   }, [searchParams, sortBy, sortOrder]) // reload when sorting changes
 
+  const sortArtifacts = (items: Artifact[]) => {
+    return [...items].sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortBy) {
+        case 'name':
+          comparison = (a.name || '').localeCompare(b.name || '');
+          break;
+        case 'uploaded_at': {
+          const parseDate = (dateStr: string | undefined): number => {
+            if (!dateStr) return 0;
+            // Handle both ISO strings and other formats
+            const date = new Date(dateStr);
+            // If date is invalid, return 0 to sort it at the beginning/end
+            return isNaN(date.getTime()) ? 0 : date.getTime();
+          };
+          const dateA = parseDate(a.uploaded_at);
+          const dateB = parseDate(b.uploaded_at);
+          comparison = dateA - dateB;
+          break;
+        }
+        case 'confidence':
+          comparison = (a.confidence || 0) - (b.confidence || 0);
+          break;
+        case 'tier':
+          comparison = (a.tier || '').localeCompare(b.tier || '');
+          break;
+        default:
+          comparison = 0;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+  }
+
   const loadArtifacts = async (query: string = '') => {
     setLoading(true)
     try {
@@ -43,9 +78,11 @@ export default function ArtifactGallery() {
           )
         }
       } else {
-        // Use sorting here
-        data = await artifactApi.getAll()
+        data = await artifactApi.getAll();
       }
+      
+      // Apply sorting to the data
+      data = sortArtifacts(data);
 
       setArtifacts(data)
     } catch (error) {
