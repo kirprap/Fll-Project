@@ -13,11 +13,19 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
+ 
   
+//Cookies are in progress  
+//document.cookie = "my_cookie_name=my_value; expires=Fri, 11 Dec 2025 12:00:00 UTC; path=/; SameSite=Lax; Secure";
+//document.cookie = username + password; expires=Fri, path=/; SameSite=Lax; Secure;
+
   const handleLogin = () => {
     // Saves Cookies (Hopefully)
-    Cookies.set(username, username, { expires: 7  });
-    console.log(username); // Shows user
+    Cookies.set(username, password, { expires: 7, path:'/' });
+    console.log("Username:" + username + " " + "Password:" + password )
+    console.log()
+
+  
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
