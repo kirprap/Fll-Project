@@ -3,12 +3,15 @@ import json
 import logging
 import os
 import sys
+from datetime import datetime, timedelta
 from io import BytesIO
 from typing import List, Optional
 
+import jwt
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from PIL import Image
 from pydantic import BaseModel
 
@@ -42,6 +45,34 @@ from fast_analyzer import FastAnalyzer
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# JWT Configuration
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key-change-in-production")
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRATION_HOURS = 24
+
+# JWT Security
+security = HTTPBearer()
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verify JWT token and return payload"""
+    try:
+        token = credentials.credentials
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        
+        # Check if token has expired
+        exp = payload.get('exp')
+        if exp and datetime.utcnow().timestamp() > exp:
+            raise HTTPException(status_code=401, detail="Token has expired")
+        
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    except Exception as e:
+        logger.error(f"Token validation error: {str(e)}")
+        raise HTTPException(status_code=401, detail="Token validation failed")
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -163,11 +194,57 @@ async def login(request: LoginRequest):
             if not password_valid:
                 raise HTTPException(status_code=401, detail="Invalid username or password")
             
+            # Generate JWT token
+            expiration = datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+            payload = {
+                "username": username,
+                "role": role,
+                "exp": expiration,
+                "iat": datetime.utcnow()
+            }
+            token = jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+            
             # Log login action
             try:
                 log_action(username, "Logged in")
             except:
                 pass  # Ignore logging errors
+            
+            return {
+                "user": {
+                    "username": username,
+                    "name": name,
+                    "email": email,
+                    "role": role
+                },
+                "token": token
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Login failed")
+
+
+@app.get("/auth/me")
+async def get_current_user(payload: dict = Depends(verify_token)):
+    """Get current user from JWT token"""
+    try:
+        username = payload.get('username')
+        if not username:
+            raise HTTPException(status_code=401, detail="Invalid token payload")
+        
+        # Get user info from database
+        DB_FILE = os.path.join(PROJECT_DIR, "MainApp", "users.db")
+        with sqlite3.connect(DB_FILE, timeout=10) as conn:
+            c = conn.cursor()
+            c.execute("SELECT username, name, role, email FROM users WHERE username=?", (username,))
+            result = c.fetchone()
+            
+            if not result:
+                raise HTTPException(status_code=401, detail="User not found")
+            
+            username, name, role, email = result
             
             return {
                 "username": username,
@@ -178,8 +255,14 @@ async def login(request: LoginRequest):
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Login error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Login failed")
+        logger.error(f"Auth me error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Token validation failed")
+
+
+@app.post("/auth/logout")
+async def logout():
+    """Logout endpoint (for token invalidation)"""
+    return {"message": "Logout successful"}
 
 
 @app.get("/api/users")
