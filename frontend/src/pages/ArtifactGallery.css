@@ -105,3 +105,12 @@
   }
 }
 
+.sort-select{
+color: rgb(255, 255, 255);
+  text-align: center;
+    background-color: rgb(89, 0, 255);
+      border-radius: 10px; /* Applies to all four corners */
+       height: 40px;
+  width: 50%;
+margin: 5px;
+}

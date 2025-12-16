@@ -18,6 +18,19 @@ export default function UploadArtifact() {
   const [stream, setStream] = useState<MediaStream | null>(null)
   const videoRef = useRef<HTMLVideoElement | null>(null)
 
+
+interface FormData {
+  length?: number
+  width?: number
+  thickness?: number
+  weight?: number
+  color?: string
+  location?: string
+  description?: string
+  tags?: string[]
+  Rome?: string 
+  rome?: string 
+}
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -131,6 +144,7 @@ export default function UploadArtifact() {
         tags: tags,
         tier: tier,
         image_data: imageData,
+         folder: formData.rome,
         form_data: Object.keys(formData).length > 0 ? formData : undefined,
         uploaded_by: user?.username,
       })
@@ -310,6 +324,13 @@ export default function UploadArtifact() {
                   placeholder="Describe the artifact's appearance, condition, material, etc."
                 />
               </div>
+                   <label>Add Folder</label>
+            <input
+  type="text"
+  value={formData.rome || ''}
+  onChange={(e) => setFormData({ ...formData, rome: e.target.value })}
+  placeholder="e.g., Rome, Greek."
+/>
             </div>
 
             <div className="upload-right">

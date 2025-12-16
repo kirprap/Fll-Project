@@ -36,7 +36,7 @@ function AppRoutes() {
       >
         <Route index element={<Dashboard />} />
         <Route path="gallery" element={<ArtifactGallery />} />
-        <Route path="upload" element={<UploadArtifact />} />
+        <Route path="upload" element={<UploadArtifact />} />\
         
         {/* Role-based protected routes */}
         {canAccess(user?.role, 'user-management') ? (

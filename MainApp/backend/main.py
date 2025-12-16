@@ -7,6 +7,10 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from typing import List, Optional
 
+
+
+
+
 import jwt
 import uvicorn
 from fastapi import FastAPI, HTTPException, Depends
@@ -154,12 +158,23 @@ class PasswordChange(BaseModel):
     new_password: str
 
 
+DB_FILE = os.path.join(PROJECT_DIR, "users.db")
+
+print("====== LOGIN DB DEBUG ======")
+print("CWD:", os.getcwd())
+print("PROJECT_DIR:", PROJECT_DIR)
+print("DB_FILE:", DB_FILE)
+print("DB EXISTS:", os.path.exists(DB_FILE))
+print("============================")
+
+
 # Authentication endpoints
 @app.post("/auth/login")
 async def login(request: LoginRequest):
     """Authenticate user and return user info"""
     try:
-        DB_FILE = os.path.join(PROJECT_DIR, "MainApp", "users.db")
+        DB_FILE = os.path.join(PROJECT_DIR, "users.db")
+       # DB_FILE = os.path.join(PROJECT_DIR, "MainApp", "users.db")
         with sqlite3.connect(DB_FILE, timeout=10) as conn:
             c = conn.cursor()
             c.execute("SELECT username, name, hashed_password, role, email FROM users WHERE username=?", (request.username,))
@@ -235,7 +250,7 @@ async def get_current_user(payload: dict = Depends(verify_token)):
             raise HTTPException(status_code=401, detail="Invalid token payload")
         
         # Get user info from database
-        DB_FILE = os.path.join(PROJECT_DIR, "MainApp", "users.db")
+        DB_FILE = os.path.join(PROJECT_DIR, "users.db")
         with sqlite3.connect(DB_FILE, timeout=10) as conn:
             c = conn.cursor()
             c.execute("SELECT username, name, role, email FROM users WHERE username=?", (username,))

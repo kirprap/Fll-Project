@@ -26,7 +26,7 @@ export default function Login() {
       navigate(from, { replace: true });
     } catch (err: any) {
       console.error('Login error:', err);
-      
+        
       // Handle different error cases
       if (err.response) {
         // The request was made and the server responded with a status code

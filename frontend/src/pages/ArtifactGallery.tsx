@@ -6,6 +6,7 @@ import ArtifactCard from '../components/ArtifactCard'
 import ArtifactModal from '../components/ArtifactModal'
 import './ArtifactGallery.css'
 
+
 export default function ArtifactGallery() {
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
   const [loading, setLoading] = useState(true)
@@ -133,9 +134,10 @@ export default function ArtifactGallery() {
             className="sort-select"
           >
             <option value="name">Name</option>
-            <option value="uploaded_at">Upload Date</option>
+            <option value="uploaded_at" className='Upload Date'>Upload Date</option>
             <option value="confidence">Confidence</option>
             <option value="tier">Tier</option>
+            <option value="folder">Folder</option>
           </select>
 
           <select
@@ -143,8 +145,8 @@ export default function ArtifactGallery() {
             onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')}
             className="sort-select"
           >
-            <option value="asc">⬆️ Ascending</option>
-            <option value="desc">⬇️ Descending</option>
+            <option value="asc" className="Ascending">⬆️ Ascending</option>
+            <option value="desc" className='Descending'>⬇️ Descending</option>
           </select>
         </div>
       </div>
