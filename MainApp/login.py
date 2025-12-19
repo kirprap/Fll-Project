@@ -5,18 +5,18 @@ The UI is now handled by the React frontend.
 """
 import sqlite3
 from datetime import datetime
-
+import os
 import bcrypt
 import yaml
 from yaml.loader import SafeLoader
 
-DB_FILE = "users.db"
-
-
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(PROJECT_DIR, "users.db")
+DB =  os.path.join(PROJECT_DIR, "user.yaml")
 # ----------------------------------------------------------------------
 # Database Functions
 # ----------------------------------------------------------------------
-def init_db():
+def init_user_db():
     """Initialize the users database and create tables if they don't exist."""
     with sqlite3.connect(DB_FILE, timeout=10) as conn:
         c = conn.cursor()
@@ -31,10 +31,9 @@ def init_db():
                         timestamp TEXT,
                         username TEXT,
                         action TEXT)""")
-
         # Load config and insert users from user.yaml if not in DB
         try:
-            with open("user.yaml") as file:
+            with open(DB) as file:
                 config = yaml.load(file, Loader=SafeLoader)
             
             # Insert users from config.yaml if not in DB
@@ -144,4 +143,4 @@ def get_audit_logs():
 
 
 # Initialize database on module import
-init_db()
+init_user_db()

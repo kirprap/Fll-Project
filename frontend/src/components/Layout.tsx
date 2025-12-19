@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { canAccess } from '../utils/permissions'
 import './Layout.css'
 
+
 export default function Layout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
@@ -62,6 +63,10 @@ export default function Layout() {
             <span className="nav-icon">🚪</span>
             <span className="nav-label">Logout</span>
           </button>
+          <footer className="sidebar-footer">
+            <p> ArtiQuest AI 2025 </p>
+            <p> Developed by FLL Team: MoonWalkers (63051)</p>
+          </footer>
         </nav>
       </aside>
       <main className="main-content">
