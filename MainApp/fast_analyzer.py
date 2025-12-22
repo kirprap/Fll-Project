@@ -40,7 +40,7 @@ class FastAnalyzer:
             from ai_analyzer import OllamaClient
             
             model_map = {
-                "FAST": "llava:7b",           # ~20-40 seconds
+                "FAST": "qwen3-vl:2b",           # ~20-40 seconds
                 "BALANCED": "qwen2-vl:7b",    # ~30-60 seconds  
                 "QUALITY": "qwen3-vl:latest"  # ~1-2 minutes
             }
@@ -163,7 +163,7 @@ def check_model_availability() -> Dict[str, bool]:
         output = result.stdout.lower()
         
         return {
-            "llava:7b": "llava:7b" in output or "llava" in output,
+            "qwen3-vl:2b": "qwen3-vl:2b" in output or "llava" in output,
             "qwen2-vl:7b": "qwen2-vl:7b" in output or "qwen2-vl" in output,
             "qwen3-vl:latest": "qwen3-vl:latest" in output or "qwen3-vl" in output,
         }
@@ -182,7 +182,7 @@ def download_fast_model():
     
     try:
         subprocess.run(
-            ["ollama", "pull", "llava:7b"],
+            ["ollama", "pull", "qwen3-vl:2b"],
             check=True
         )
         print("✅ Model downloaded successfully!")
@@ -215,4 +215,4 @@ if __name__ == "__main__":
     print("\n" + "=" * 50)
     print("\nRecommendation for 2-minute target: Use FAST or BALANCED tier")
     print("\nTo download the fast model:")
-    print("  ollama pull llava:7b")
+    print("  ollama pull qwen3-vl:2b")

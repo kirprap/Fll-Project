@@ -1,0 +1,31 @@
+credentials:
+  usernames:
+    admin:
+      name: Admin User
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      password: Admin@123 # Will be hashed automatically
+      role: admin
+      email: admin@example.com
+    user2:
+      name: Field Engineer
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      password: abc # Will be hashed automatically
+      role: field
+      email: user2@example.com
+    user3:
+      name: Lab Engineer
+      failed_login_attempts: 0 # Will be managed automatically
+      logged_in: False # Will be managed automatically
+      password: abc # Will be hashed automatically
+      role: onsite
+      email: kirprap2@gmail.com
+cookie:
+  name: my_cookie_name
+  key: my_signature_key
+  expiry_days: 30
+
+preauthorized:
+  emails:
+    - admin@example.com

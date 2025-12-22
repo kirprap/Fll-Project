@@ -1,0 +1,9 @@
+{   
+    "User1":{
+    "username":"admin",
+    "password":"admin",
+    "rank":"2",
+    "email": "admin@admin.com"
+    }
+    // rank 0 =  default user, rank 1 = archeologist, rank 3 = admin
+}

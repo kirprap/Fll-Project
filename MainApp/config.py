@@ -1,8 +1,13 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Get the directory where this config.py file is located (MainApp directory)
+MAINAPP_DIR = Path(__file__).parent
+
+# Load environment variables from .env file in MainApp directory
+env_path = MAINAPP_DIR / ".env"
+load_dotenv(dotenv_path=env_path)
 
 # Database configuration
 DATABASE_URL = os.getenv('DATABASE_URL')

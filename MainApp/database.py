@@ -1,22 +1,23 @@
+import base64
 import os
+from contextlib import contextmanager
 from datetime import datetime
-from typing import Optional, Dict, Any, List, Union
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import (
-    create_engine,
     Column,
+    DateTime,
+    Float,
     Integer,
+    LargeBinary,
     String,
     Text,
-    Float,
-    DateTime,
-    LargeBinary,
+    create_engine,
+    inspect,
+    text,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from contextlib import contextmanager
-import base64
-from sqlalchemy import inspect, text
 
 # ----------------------------------------------------------------------
 # Configuration
@@ -37,17 +38,17 @@ if _DB_URL.startswith("sqlite"):
         _DB_URL,
         connect_args={"check_same_thread": False},
         pool_pre_ping=True,  # Verify connections before using
-        pool_recycle=3600,   # Recycle connections after 1 hour
+        pool_recycle=3600,  # Recycle connections after 1 hour
     )
 else:
     # PostgreSQL connection pooling
     engine = create_engine(
         _DB_URL,
-        pool_size=10,           # Number of connections to maintain
-        max_overflow=20,        # Additional connections when pool is full
-        pool_pre_ping=True,     # Verify connections before using
-        pool_recycle=3600,      # Recycle connections after 1 hour
-        echo=False,             # Disable SQL logging for performance
+        pool_size=10,  # Number of connections to maintain
+        max_overflow=20,  # Additional connections when pool is full
+        pool_pre_ping=True,  # Verify connections before using
+        pool_recycle=3600,  # Recycle connections after 1 hour
+        echo=False,  # Disable SQL logging for performance
     )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -79,10 +80,15 @@ class Artifact(Base):
     # Image data
     image_data: Optional[bytes] = Column(LargeBinary)
     thumbnail: Optional[bytes] = Column(LargeBinary)
+    
+    # 3D model data
+    model_3d_data: Optional[bytes] = Column(LargeBinary)
+    model_3d_format: Optional[str] = Column(String(10))  # e.g., "obj", "stl", "ply"
 
     # Timestamps
     uploaded_at: datetime = Column(DateTime, default=datetime.utcnow, nullable=False)
     analyzed_at: Optional[datetime] = Column(DateTime, default=datetime.utcnow)
+    updated_at: Optional[datetime] = Column(DateTime)
 
     # Expert verification fields
     verification_status: str = Column(String(50), default="pending")
@@ -96,6 +102,15 @@ class Artifact(Base):
     references: Optional[str] = Column(Text)
     # Tags (comma-separated)
     tags: Optional[str] = Column(Text)
+
+    # Form data (JSON string with physical measurements)
+    form_data: Optional[str] = Column(Text)
+
+    # Analysis tier used
+    tier: Optional[str] = Column(String(50))
+
+    # User who uploaded the artifact
+    uploaded_by: Optional[str] = Column(String(200))
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert artifact to a plain‑dictionary representation."""
@@ -112,8 +127,17 @@ class Artifact(Base):
             "confidence": self.confidence,
             "image_data": self.image_data,
             "thumbnail": self.thumbnail,
-            "uploaded_at": self.uploaded_at.isoformat() + "Z" if self.uploaded_at else None,
-            "analyzed_at": self.analyzed_at.isoformat() + "Z" if self.analyzed_at else None,
+            "model_3d_data": self.model_3d_data,
+            "model_3d_format": self.model_3d_format,
+            "uploaded_at": self.uploaded_at.isoformat() + "Z"
+            if self.uploaded_at
+            else None,
+            "analyzed_at": self.analyzed_at.isoformat() + "Z"
+            if self.analyzed_at
+            else None,
+            "updated_at": self.updated_at.isoformat() + "Z"
+            if self.updated_at
+            else None,
             "verification_status": self.verification_status,
             "verified_by": self.verified_by,
             "verified_at": self.verified_at.isoformat() if self.verified_at else None,
@@ -122,6 +146,9 @@ class Artifact(Base):
             "historical_context": self.historical_context,
             "references": self.references,
             "tags": self.tags,
+            "form_data": self.form_data,
+            "tier": self.tier,
+            "uploaded_by": self.uploaded_by,
         }
 
 
@@ -140,6 +167,18 @@ def init_db() -> None:
                 conn.execute(text("ALTER TABLE artifacts ADD COLUMN tags TEXT"))
             if "thumbnail" not in columns:
                 conn.execute(text("ALTER TABLE artifacts ADD COLUMN thumbnail BLOB"))
+            if "form_data" not in columns:
+                conn.execute(text("ALTER TABLE artifacts ADD COLUMN form_data TEXT"))
+            if "tier" not in columns:
+                conn.execute(text("ALTER TABLE artifacts ADD COLUMN tier VARCHAR(50)"))
+            if "updated_at" not in columns:
+                conn.execute(text("ALTER TABLE artifacts ADD COLUMN updated_at DATETIME"))
+            if "model_3d_data" not in columns:
+                conn.execute(text("ALTER TABLE artifacts ADD COLUMN model_3d_data BLOB"))
+            if "model_3d_format" not in columns:
+                conn.execute(text("ALTER TABLE artifacts ADD COLUMN model_3d_format VARCHAR(10)"))
+            if "uploaded_by" not in columns:
+                conn.execute(text("ALTER TABLE artifacts ADD COLUMN uploaded_by VARCHAR(200)"))
             conn.commit()
     except Exception:
         # Best-effort; ignore if not supported or already exists
@@ -182,14 +221,23 @@ def _normalize_tags_input(tags: Optional[Union[List[str], str]]) -> List[str]:
     return normalized
 
 
-def save_artifact(artifact_data: Dict[str, Any], image_bytes: bytes = None, thumbnail_bytes: bytes = None) -> int:
+def save_artifact(
+    artifact_data: Dict[str, Any],
+    image_bytes: bytes = None,
+    thumbnail_bytes: bytes = None,
+    model_3d_bytes: bytes = None,
+) -> int:
     """Persist a newly analysed artifact and return its primary key."""
     with get_db() as db:
         tags_list = _normalize_tags_input(artifact_data.get("tags"))
         # Handle both old format (image_data in artifact_data) and new format (separate params)
         image_to_save = image_bytes if image_bytes else artifact_data.get("image_data")
-        thumbnail_to_save = thumbnail_bytes if thumbnail_bytes else artifact_data.get("thumbnail")
-        
+        thumbnail_to_save = (
+            thumbnail_bytes if thumbnail_bytes else artifact_data.get("thumbnail")
+        )
+        # Handle 3D model data
+        model_3d_to_save = model_3d_bytes if model_3d_bytes else artifact_data.get("model_3d_data")
+
         artifact = Artifact(
             name=artifact_data.get("name", "Unknown"),
             value=artifact_data.get("value", "Unknown"),
@@ -202,8 +250,13 @@ def save_artifact(artifact_data: Dict[str, Any], image_bytes: bytes = None, thum
             confidence=artifact_data.get("confidence", 0.0),
             image_data=image_to_save,
             thumbnail=thumbnail_to_save,
+            model_3d_data=model_3d_to_save,
+            model_3d_format=artifact_data.get("model_3d_format"),
             analyzed_at=datetime.utcnow(),
             tags=",".join(tags_list) if tags_list else None,
+            form_data=artifact_data.get("form_data"),
+            tier=artifact_data.get("tier"),
+            uploaded_by=artifact_data.get("uploaded_by"),
         )
         db.add(artifact)
         db.flush()  # Obtain PK without committing twice
@@ -229,9 +282,13 @@ def get_all_artifacts(
             # Convert binary fields to base64 strings for JSON serialization
             if include_images:
                 if data.get("image_data") is not None:
-                    data["image_data"] = base64.b64encode(data["image_data"]).decode("utf-8")
+                    data["image_data"] = base64.b64encode(data["image_data"]).decode(
+                        "utf-8"
+                    )
                 if data.get("thumbnail") is not None:
-                    data["thumbnail"] = base64.b64encode(data["thumbnail"]).decode("utf-8")
+                    data["thumbnail"] = base64.b64encode(data["thumbnail"]).decode(
+                        "utf-8"
+                    )
             else:
                 # Remove binary fields if not including images
                 data.pop("image_data", None)
@@ -274,8 +331,7 @@ def search_artifacts(
                 pattern = f"%{kw}%"
                 q = q.filter(
                     Artifact.id.in_(
-                        db.query(Artifact.id)
-                        .filter(
+                        db.query(Artifact.id).filter(
                             (Artifact.name.ilike(pattern))
                             | (Artifact.description.ilike(pattern))
                             | (Artifact.cultural_context.ilike(pattern))
@@ -298,7 +354,9 @@ def search_artifacts(
             data = artifact.to_dict()
             # Convert binary fields to base64 strings for JSON serialization
             if data.get("image_data") is not None:
-                data["image_data"] = base64.b64encode(data["image_data"]).decode("utf-8")
+                data["image_data"] = base64.b64encode(data["image_data"]).decode(
+                    "utf-8"
+                )
             if data.get("thumbnail") is not None:
                 data["thumbnail"] = base64.b64encode(data["thumbnail"]).decode("utf-8")
             results.append(data)
@@ -335,7 +393,9 @@ def update_artifact_verification(
         return data
 
 
-def update_artifact_tags(artifact_id: int, tags: Optional[Union[List[str], str]]) -> Optional[Dict[str, Any]]:
+def update_artifact_tags(
+    artifact_id: int, tags: Optional[Union[List[str], str]]
+) -> Optional[Dict[str, Any]]:
     """Update the tags for a given artifact and return its dict."""
     with get_db() as db:
         artifact = db.query(Artifact).filter(Artifact.id == artifact_id).first()
@@ -351,6 +411,33 @@ def update_artifact_tags(artifact_id: int, tags: Optional[Union[List[str], str]]
         if data.get("thumbnail") is not None:
             data["thumbnail"] = base64.b64encode(data["thumbnail"]).decode("utf-8")
         return data
+
+
+def update_artifact(artifact_id: int, update_data: Dict[str, Any]) -> bool:
+    """Update an artifact with the provided data. Returns True if updated."""
+    with get_db() as db:
+        artifact = db.query(Artifact).filter(Artifact.id == artifact_id).first()
+        if not artifact:
+            return False
+
+        # Update fields that are provided
+        if "name" in update_data:
+            artifact.name = update_data["name"]
+        if "description" in update_data:
+            artifact.description = update_data["description"]
+        if "tags" in update_data:
+            tags_list = _normalize_tags_input(update_data["tags"])
+            artifact.tags = ",".join(tags_list) if tags_list else None
+        if "form_data" in update_data:
+            artifact.form_data = update_data["form_data"]
+        if "verification_status" in update_data:
+            artifact.verification_status = update_data["verification_status"]
+            if update_data["verification_status"] == "verified":
+                artifact.verified_at = datetime.utcnow()
+
+        artifact.updated_at = datetime.utcnow()
+        db.flush()
+        return True
 
 
 def delete_artifact(artifact_id: int) -> bool:
