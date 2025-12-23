@@ -36,7 +36,7 @@ export default function Layout() {
           <h1>🏺 ArtiQuest</h1>
           {user && (
             <div className="user-info">
-              <p>Welcome, {user.name}!</p>
+              <p>Welcome, {user.name}☑️!</p>
               <p className="user-role">{user.role}</p>
             </div>
           )}
@@ -64,7 +64,7 @@ export default function Layout() {
             <span className="nav-label">Logout</span>
           </button>
           <footer className="sidebar-footer">
-            <p> ArtiQuest AI 2025 </p>
+            <p> ArtiQuest AI© 2025 </p>
             <p> Developed by FLL Team: MoonWalkers (63051)</p>
           </footer>
         </nav>

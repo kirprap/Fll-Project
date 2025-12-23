@@ -129,6 +129,10 @@ interface FormData {
       setLoading(false)
     }
   }
+  const handleFolder = async () => {
+
+
+  }
 
   const handleSave = async () => {
     if (!imageFile || !analysisResult) return
@@ -324,13 +328,27 @@ interface FormData {
                   placeholder="Describe the artifact's appearance, condition, material, etc."
                 />
               </div>
-                   <label>Add Folder</label>
-            <input
-  type="text"
-  value={formData.rome || ''}
-  onChange={(e) => setFormData({ ...formData, rome: e.target.value })}
-  placeholder="e.g., Rome, Greek."
-/>
+            <button
+                onClick={handleFolder}
+                
+                className="handle-folder"
+              >
+                {loading ? 'Analyzing...' : 'Create'}
+              </button>
+              <p className='Folder-p'>
+                or use a
+              </p>
+              <button
+                onClick={handleFolder}
+                
+                className="handle-folder"
+              >
+                {loading ? 'Analyzing...' : 'Existing'}
+              </button>
+                 <p className='Folder-p2'>
+                Folder
+              </p>
+
             </div>
 
             <div className="upload-right">

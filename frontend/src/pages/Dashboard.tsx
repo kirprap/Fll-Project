@@ -37,7 +37,7 @@ export default function Dashboard() {
   }
 
   const isAdmin = canAccess(user?.role, 'audit-logs')
-  const roleTitle = isAdmin ? 'Admin Dashboard' : 'User Dashboard'
+  const roleTitle = isAdmin ? 'Admin Dashboard☑️' : 'User Dashboard'
 
   return (
     <div className="dashboard">

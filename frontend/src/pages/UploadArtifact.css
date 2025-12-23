@@ -257,3 +257,27 @@
   }
 }
 
+.Folder-p {
+
+text-align: center; 
+}
+
+.Folder-p2 {
+text-align: center;  
+
+}
+
+.handle-folder {
+  width: 100%;
+  padding: 12px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.2s;
+
+}
